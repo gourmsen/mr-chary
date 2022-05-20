@@ -1,0 +1,1538 @@
+{
+    "version":"1.8.1",
+    "groups": [
+        {
+            "name": "Rifles",
+            "items": [
+                {
+                    "name": "Winfield 1873C",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 41
+                        },
+                        {
+                            "name": "Silencer",
+                            "slots": 3,
+                            "price": 55
+                        },
+                        {
+                            "name": "Marksman",
+                            "slots": 3,
+                            "price": 56
+                        },
+                        {
+                            "name": "Vandal",
+                            "slots": 2,
+                            "price": 35
+                        },
+                        {
+                            "name": "Vandal Striker",
+                            "slots": 2,
+                            "price": 39
+                        },
+                        {
+                            "name": "Vandal Deadeye",
+                            "slots": 2,
+                            "price": 45
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "High Velocity",
+                            "price": 75,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 25,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 35,
+                            "type": "Compact"
+                        }
+                    ]
+                },
+                {
+                    "name": "Springfield 1866",
+                    "ammoSlots": 2,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 38
+                        },
+                        {
+                            "name": "Marksman",
+                            "slots": 3,
+                            "price": 73
+                        },
+                        {
+                            "name": "Compact",
+                            "slots": 2,
+                            "price": 33
+                        },
+                        {
+                            "name": "Compact Striker",
+                            "slots": 2,
+                            "price": 56
+                        },
+                        {
+                            "name": "Compact Deadeye",
+                            "slots": 2,
+                            "price": 46
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Dumdum",
+                            "price": 50,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Explosive",
+                            "price": 90,
+                            "type": "Medium"
+                        }
+                    ]
+                },
+                {
+                    "name": "Vetterli 71 Karabiner",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 105
+                        },
+                        {
+                            "name": "Deadeye",
+                            "slots": 3,
+                            "price": 130
+                        },
+                        {
+                            "name": "Marksman",
+                            "slots": 3,
+                            "price": 190
+                        },
+                        {
+                            "name": "Bayonet",
+                            "slots": 3,
+                            "price": 155
+                        },
+                        {
+                            "name": "Silencer",
+                            "slots": 3,
+                            "price": 150
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 30,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 45,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "High Velocity",
+                            "price": 90,
+                            "type": "Medium"
+                        }
+                    ]
+                },
+                {
+                    "name": "Martini-Henry IC1",
+                    "ammoSlots": 2,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 122
+                        },
+                        {
+                            "name": "Deadeye",
+                            "slots": 3,
+                            "price": 145
+                        },
+                        {
+                            "name": "Riposte",
+                            "slots": 3,
+                            "price": 164
+                        },
+                        {
+                            "name": "Marksman",
+                            "slots": 3,
+                            "price": 173
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 35,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 60,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Explosive",
+                            "price": 120,
+                            "type": "Long"
+                        }
+                    ]
+                },
+                {
+                    "name": "Winfield 1873",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 75
+                        },
+                        {
+                            "name": "Aperture",
+                            "slots": 3,
+                            "price": 80
+                        },
+                        {
+                            "name": "Talon",
+                            "slots": 3,
+                            "price": 100
+                        },
+                        {
+                            "name": "Swift",
+                            "slots": 3,
+                            "price": 128
+                        },
+                        {
+                            "name": "Musket Bayonet",
+                            "slots": 3,
+                            "price": 137
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 25,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "High Velocity",
+                            "price": 75,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 35,
+                            "type": "Compact"
+                        }
+                    ]
+                },
+                {
+                    "name": "Sparks LRR",
+                    "ammoSlots": 2,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 130
+                        },
+                        {
+                            "name": "Silencer",
+                            "slots": 3,
+                            "price": 150
+                        },
+                        {
+                            "name": "Sniper",
+                            "slots": 3,
+                            "price": 199
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 35,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Poison",
+                            "price": 60,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 60,
+                            "type": "Long"
+                        }
+                    ]
+                },                
+                {
+                    "name": "Lebel 1886",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 397
+                        },
+                        {
+                            "name": "Aperture",
+                            "slots": 3,
+                            "price": 425
+                        },
+                        {
+                            "name": "Talon",
+                            "slots": 3,
+                            "price": 422
+                        },
+                        {
+                            "name": "Marksman",
+                            "slots": 3,
+                            "price": 437
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 35,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Spitzer",
+                            "price": 220,
+                            "type": "Long"
+                        }
+                    ]
+                },                
+                {
+                    "name": "Berthier Mle 1892",
+                    "ammoSlots": 2,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 356
+                        },
+                        {
+                            "name": "Riposte",
+                            "slots": 3,
+                            "price": 370
+                        },
+                        {
+                            "name": "Deadeye",
+                            "slots": 3,
+                            "price": 388
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 35,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Spitzer",
+                            "price": 220,
+                            "type": "Long"
+                        }
+                    ]
+                },             
+                {
+                    "name": "Winfield M1876 Centennial",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 157
+                        },
+                        {
+                            "name": "Sniper",
+                            "slots": 3,
+                            "price": 229
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Poison",
+                            "price": 40,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 45,
+                            "type": "Medium"
+                        }
+                    ]
+                },
+                {
+                    "name": "Mosin-Nagant M1891",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 490
+                        },
+                        {
+                            "name": "Obrez",
+                            "slots": 2,
+                            "price": 290
+                        },
+                        {
+                            "name": "Bayonet",
+                            "slots": 3,
+                            "price": 540
+                        },
+                        {
+                            "name": "Obrez Maze",
+                            "slots": 2,
+                            "price": 310
+                        },
+                        {
+                            "name": "Sniper",
+                            "slots": 3,
+                            "price": 550
+                        },
+                        {
+                            "name": "Obrez Drum",
+                            "slots": 2,
+                            "price": 350
+                        },
+                        {
+                            "name": "Avtomat",
+                            "slots": 3,
+                            "price": 1250
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 35,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Spitzer",
+                            "price": 220,
+                            "type": "Long"
+                        }
+                    ]
+                },
+                {
+                    "name": "Nitro Express Rifle",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 1015
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Shredder",
+                            "price": 150,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Explosive",
+                            "price": 200,
+                            "type": "Special"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Pistols",
+            "items": [
+                {
+                    "name": "Nagant M1895",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 24
+                        },
+                        {
+                            "name": "Precision",
+                            "slots": 2,
+                            "price": 29
+                        },
+                        {
+                            "name": "Silencer",
+                            "slots": 1,
+                            "price": 53
+                        },
+                        {
+                            "name": "Deadeye",
+                            "slots": 2,
+                            "price": 42
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Poison",
+                            "price": 35,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "High Velocity",
+                            "price": 75,
+                            "type": "Compact"
+                        }
+                    ]
+                },
+                {
+                    "name": "Scottfield No. 3",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 77
+                        },
+                        {
+                            "name": "Brawler",
+                            "slots": 1,
+                            "price": 92
+                        },
+                        {
+                            "name": "Spitfire",
+                            "slots": 1,
+                            "price": 108
+                        },
+                        {
+                            "name": "Precision",
+                            "slots": 2,
+                            "price": 85
+                        },
+                        {
+                            "name": "Swift",
+                            "slots": 1,
+                            "price": 95
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 30,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 45,
+                            "type": "Medium"
+                        }
+                    ]
+                },
+                {
+                    "name": "Caldwell 92 New Army",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 90
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Dumdum",
+                            "price": 40,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 35,
+                            "type": "Compact"
+                        }
+                    ]
+                },
+                {
+                    "name": "Caldwell Pax",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 100
+                        },
+                        {
+                            "name": "Claw",
+                            "slots": 1,
+                            "price": 125
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 30,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Dumdum",
+                            "price": 50,
+                            "type": "Medium"
+                        }
+                    ]
+                },
+                {
+                    "name": "Caldwell Conversion Pistol",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 26
+                        },
+                        {
+                            "name": "Chain",
+                            "slots": 1,
+                            "price": 50
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Dumdum",
+                            "price": 40,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 35,
+                            "type": "Compact"
+                        }
+                    ]
+                },
+                {
+                    "name": "Caldwell Conversion Uppercut",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 275
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 35,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Explosive",
+                            "price": 120,
+                            "type": "Long"
+                        }
+                    ]
+                },
+                {
+                    "name": "Bornheim No. 3",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 201
+                        },
+                        {
+                            "name": "Match",
+                            "slots": 2,
+                            "price": 224
+                        },
+                        {
+                            "name": "Extended",
+                            "slots": 1,
+                            "price": 306
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 25,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "High Velocity",
+                            "price": 75,
+                            "type": "Compact"
+                        }
+                    ]
+                },
+                {
+                    "name": "Nagant M1895 Officer",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 96
+                        },
+                        {
+                            "name": "Brawler",
+                            "slots": 1,
+                            "price": 110
+                        },
+                        {
+                            "name": "Carbine",
+                            "slots": 2,
+                            "price": 155
+                        },
+                        {
+                            "name": "Carbine Deadeye",
+                            "slots": 2,
+                            "price": 211
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Poison",
+                            "price": 35,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "High Velocity",
+                            "price": 75,
+                            "type": "Compact"
+                        }
+                    ]
+                },
+                {
+                    "name": "LeMat Mark II",
+                    "ammoSlots": 2,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 95
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Starshell",
+                            "price": 10,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 25,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Dragon Breath",
+                            "price": 50,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 35,
+                            "type": "Compact"
+                        },
+                        {
+                            "name": "Slug",
+                            "price": 200,
+                            "type": "Shotgun"
+                        }
+                    ]
+                },
+                {
+                    "name": "Dolch 96",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 750
+                        },
+                        {
+                            "name": "Precision",
+                            "slots": 2,
+                            "price": 790
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Special"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Shotguns",
+            "items": [
+                {
+                    "name": "Romero 77",
+                    "ammoSlots": 2,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 34
+                        },
+                        {
+                            "name": "Handcannon",
+                            "slots": 2,
+                            "price": 26
+                        },
+                        {
+                            "name": "Talon",
+                            "slots": 3,
+                            "price": 59
+                        },
+                        {
+                            "name": "Hatchet",
+                            "slots": 2,
+                            "price": 62
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Starshell",
+                            "price": 10,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Dragon Breath",
+                            "price": 50,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Penny Shot",
+                            "price": 10,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Slug",
+                            "price": 200,
+                            "type": "Shotgun"
+                        }
+                    ]
+                },
+                {
+                    "name": "Caldwell Rival 78",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 100
+                        },
+                        {
+                            "name": "Handcannon",
+                            "slots": 2,
+                            "price": 85
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Flechette",
+                            "price": 45,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Penny Shot",
+                            "price": 10,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Slug",
+                            "price": 200,
+                            "type": "Shotgun"
+                        }
+                    ]
+                },
+                {
+                    "name": "Specter 1882",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 188
+                        },
+                        {
+                            "name": "Compact",
+                            "slots": 2,
+                            "price": 164
+                        },
+                        {
+                            "name": "Bayonet",
+                            "slots": 3,
+                            "price": 223
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Flechette",
+                            "price": 45,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Dragon Breath",
+                            "price": 50,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Penny Shot",
+                            "price": 10,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Slug",
+                            "price": 200,
+                            "type": "Shotgun"
+                        }
+                    ]
+                },
+                {
+                    "name": "Winfield 1893 Slate",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 250
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Penny Shot",
+                            "price": 10,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Slug",
+                            "price": 200,
+                            "type": "Shotgun"
+                        }
+                    ]
+                },
+                {
+                    "name": "Winfield 1887 Terminus",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 309
+                        },
+                        {
+                            "name": "Handcannon",
+                            "slots": 2,
+                            "price": 289
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Flechette",
+                            "price": 45,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Dragon Breath",
+                            "price": 50,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Penny Shot",
+                            "price": 10,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Slug",
+                            "price": 200,
+                            "type": "Shotgun"
+                        }
+                    ]
+                },
+                {
+                    "name": "Crown & King Auto-5",
+                    "ammoSlots": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 600
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Penny Shot",
+                            "price": 10,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Slug",
+                            "price": 200,
+                            "type": "Shotgun"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Melee",
+            "items": [
+                {
+                    "name": "Combat Axe",
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 2,
+                            "price": 5
+                        }
+                    ]
+                },
+                {
+                    "name": "Machete",
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 18
+                        }
+                    ]
+                },
+                {
+                    "name": "Cavalry Saber",
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 60
+                        }
+                    ]
+                },
+                {
+                    "name": "Bomb Lance",
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 199
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Bows",
+            "items": [
+                {
+                    "name": "Hand Crossbow",
+                    "ammoSlots": 2,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 1,
+                            "price": 30
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Poison",
+                            "price": 25,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Chaos",
+                            "price": 10,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Choke",
+                            "price": 20,
+                            "type": "Special"
+                        }
+                    ]
+                },
+                {
+                    "name": "Crossbow",
+                    "ammoSlots": 2,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 50
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Explosive",
+                            "price": 70,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Shot",
+                            "price": 80,
+                            "type": "Special"
+                        }
+                    ]
+                },
+                {
+                    "name": "Hunting Bow",
+                    "ammoSlots": 2,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 2,
+                            "price": 57
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Poison",
+                            "price": 65,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Concertina",
+                            "price": 85,
+                            "type": "Special"
+                        },
+                        {
+                            "name": "Frag",
+                            "price": 77,
+                            "type": "Special"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Tools",
+            "items": [
+                {
+                    "name": "Combat Axe",
+                    "variants": [
+                        {
+                            "name": "Throwing Axes",
+                            "price": 30
+                        }
+                    ]
+                },
+                {
+                    "name": "Knife",
+                    "variants": [
+                        {
+                            "name": "Knife",
+                            "price": 20
+                        },
+                        {
+                            "name": "Throwing Knives",
+                            "price": 40
+                        },
+                        {
+                            "name": "Heavy",
+                            "price": 25
+                        }
+                    ]
+                },
+                {
+                    "name": "Light",
+                    "variants": [
+                        {
+                            "name": "Electrical Lamp",
+                            "price": 5
+                        },
+                        {
+                            "name": "Fusees",
+                            "price": 10
+                        },
+                        {
+                            "name": "Flare Pistol",
+                            "price": 36
+                        }
+                    ]
+                },
+                {
+                    "name": "First Aid Kit",
+                    "variants": [
+                        {
+                            "name": "First Aid Kit",
+                            "price": 30
+                        }
+                    ]
+                },
+                {
+                    "name": "Dusters",
+                    "variants": [
+                        {
+                            "name": "Dusters",
+                            "price": 15
+                        },
+                        {
+                            "name": "Knuckle Knife",
+                            "price": 15
+                        }
+                    ]
+                },
+                {
+                    "name": "Poison",
+                    "variants": [
+                        {
+                            "name": "Poison Trip Mines",
+                            "price": 30
+                        }
+                    ]
+                },
+                {
+                    "name": "Choke Bomb",
+                    "variants": [
+                        {
+                            "name": "Choke Bomb",
+                            "price": 25
+                        }
+                    ]
+                },
+                {
+                    "name": "Deception",
+                    "variants": [
+                        {
+                            "name": "Decoys",
+                            "price": 6
+                        },
+                        {
+                            "name": "Alert Trip Mines",
+                            "price": 30
+                        },
+                        {
+                            "name": "Blank Fire Decoys",
+                            "price": 45
+                        },
+                        {
+                            "name": "Decoy Fuses",
+                            "price": 30
+                        }
+                    ]
+                },
+                {
+                    "name": "Tactical Gadgets",
+                    "variants": [
+                        {
+                            "name": "Concertina Trip Mines",
+                            "price": 8
+                        }
+                    ]
+                },
+                {
+                    "name": "Spyglass",
+                    "variants": [
+                        {
+                            "name": "Spyglass",
+                            "price": 8
+                        }
+                    ]
+                },
+                {
+                    "name": "Quad Derringer",
+                    "variants": [
+                        {
+                            "name": "Quad Derringer",
+                            "price": 30
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Consumables",
+            "items": [
+                {
+                    "name": "Healing Shots",
+                    "variants": [
+                        {
+                            "name": "Vitality Shot (Weak)",
+                            "price": 10
+                        },
+                        {
+                            "name": "Stamina Shot (Weak)",
+                            "price": 60
+                        },
+                        {
+                            "name": "Regeneration Shot (Weak)",
+                            "price": 65
+                        },
+                        {
+                            "name": "Vitality Shot",
+                            "price": 65
+                        },
+                        {
+                            "name": "Stamina Shot",
+                            "price": 100
+                        },
+                        {
+                            "name": "Regeneration Shot",
+                            "price": 110
+                        }
+                    ]
+                },
+                {
+                    "name": "Poison",
+                    "variants": [
+                        {
+                            "name": "Antidote Shot (Weak)",
+                            "price": 30
+                        },
+                        {
+                            "name": "Poison Bomb",
+                            "price": 25
+                        },
+                        {
+                            "name": "Antidote Shot",
+                            "price": 55
+                        },
+                        {
+                            "name": "Hive Bomb",
+                            "price": 40
+                        }
+                    ]
+                },
+                {
+                    "name": "Fire",
+                    "variants": [
+                        {
+                            "name": "Fire Bomb",
+                            "price": 18
+                        },
+                        {
+                            "name": "Liquid Fire Bomb",
+                            "price": 23
+                        },
+                        {
+                            "name": "Hellfire Bomb",
+                            "price": 70
+                        }
+                    ]
+                },
+                {
+                    "name": "Explosives",
+                    "variants": [
+                        {
+                            "name": "Dynamite Stick",
+                            "price": 18
+                        },
+                        {
+                            "name": "Waxed Dynamite Stick",
+                            "price": 24
+                        },
+                        {
+                            "name": "Sticky Bomb",
+                            "price": 64
+                        },
+                        {
+                            "name": "Dynamite Bundle",
+                            "price": 75
+                        },
+                        {
+                            "name": "Frag Bomb",
+                            "price": 70
+                        },
+                        {
+                            "name": "Big Dynamite Bundle",
+                            "price": 110
+                        }
+                    ]
+                },
+                {
+                    "name": "Deception",
+                    "variants": [
+                        {
+                            "name": "Chaos Bomb",
+                            "price": 15
+                        }
+                    ]
+                },
+                {
+                    "name": "Tactical Gadgets",
+                    "variants": [
+                        {
+                            "name": "Flash Bomb",
+                            "price": 47
+                        },
+                        {
+                            "name": "Concertina Bomb",
+                            "price": 48
+                        }
+                    ]
+                },
+                {
+                    "name": "Restock",
+                    "variants": [
+                        {
+                            "name": "Ammo Box",
+                            "price": 65
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
