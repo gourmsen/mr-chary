@@ -37,6 +37,9 @@ client.on('messageCreate', message => {
         case 'list':
             client.commands.get('list').execute(message, args);
             break;
+        case 'random':
+            client.commands.get('random').execute(message, args);
+            break;
         default:
             client.commands.get('help').execute(message, args);
             break;

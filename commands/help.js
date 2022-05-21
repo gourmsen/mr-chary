@@ -8,11 +8,12 @@ module.exports = {
         const embed = new MessageEmbed()
         .setTitle("Help")
         .setDescription("List of commands")
-        .setColor("#FEE75C")
+        .setColor("#fee75c")
         .setTimestamp()
         .addFields(
             {name: "`!cry help`", value: "Prints this help.", inline: false},
-            {name: "`!cry list (-g|--group=<name>`)", value: "Lists all available items.", inline: false}
+            {name: "`!cry list (-g|--group=<name>)`", value: "Lists all available items.", inline: false},
+            {name: "`!cry random`", value: "Generates a random loadout.", inline: false}
         );
 
         message.channel.send({ embeds: [embed] });

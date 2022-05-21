@@ -6,8 +6,10 @@ module.exports = {
     execute(message, args) {
 
         var argumentGroup = "";
+
         // read arguments
         for(var a = 0; a < args.length; a++) {
+            var argSingleName = args[a];
 
             var argName = args[a].substr(0, args[a].indexOf('='));
             var argValue = args[a].split('=')[1];
@@ -16,6 +18,12 @@ module.exports = {
                 case "-g":
                 case "--group":
                     argumentGroup = argValue;
+                    break;
+                default:
+                    break;
+            }
+
+            switch (argSingleName) {
                 default:
                     break;
             }
@@ -29,7 +37,6 @@ module.exports = {
 
             // list all groups
             for (var i = 0; i < itemData.groups.length; i++) {
-
                 var itemGroup = itemData.groups[i];
 
                 // only display group from passed argument
@@ -45,14 +52,12 @@ module.exports = {
                 
                 // list all items
                 for (var j = 0; j < itemGroup.items.length; j++) {
-
                     var item = itemGroup.items[j];
 
                     var variantString = "";
 
                     // list all variants
                     for (var k = 0; k < item.variants.length; k++) {
-
                         var variant = item.variants[k];
 
                         variantString = variantString + "• " + variant.name + " `" + variant.price + "$`" + "\n";
