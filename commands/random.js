@@ -90,6 +90,14 @@ module.exports = {
             hasAllowedSlots = true;
         }
 
+        // switch weapons if primary occupies less slots
+        if (secondaryWeapon[2].slots > primaryWeapon[2].slots) {
+            console.log("random.js: Switched weapon slots, because " + primaryWeapon[1].name, primaryWeapon[2].name + " < " + secondaryWeapon[1].name, secondaryWeapon[2].name);
+            var tempWeapon = primaryWeapon;
+            primaryWeapon = secondaryWeapon;
+            secondaryWeapon = tempWeapon;
+        }
+
         // get tools
         maxCount = getItemCount("Tools");
         tools = [];
@@ -113,26 +121,51 @@ module.exports = {
         .setColor("#7e42f5")
         .setTimestamp();
         
-        if (primaryWeapon[0].name === 'Melee') {
-            embed.addField("Primary Slot", "`" + primaryWeapon[1].name +
-            " (" + primaryWeapon[2].name + ")`", false);
+        embed.addField("Primary Weapon", "`" + primaryWeapon[1].name +
+        " (" + primaryWeapon[2].name + ")`", true);
+
+        // add field for ammo for shootable weapons
+        if (primaryWeapon[0].name !== 'Melee') {
+            if (primaryWeapon[1].ammoSlots === 1) {
+                embed.addField("Ammunition", "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "`", true);
+                embed.addField('\u200B', '\u200B', true);
+            }
+
+            if (primaryWeapon[1].ammoSlots === 2) {
+                embed.addField("Ammunition", "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "` " + 
+                                             "`" + primaryWeapon[3][1].name + " " + primaryWeapon[3][1].type + "`", true);
+                embed.addField('\u200B', '\u200B', true);
+            }
         } else {
-            embed.addField("Primary Slot", "`" + primaryWeapon[1].name +
-            " (" + primaryWeapon[2].name + ")" +
-            " (" + primaryWeapon[3].name + " " + primaryWeapon[3].type + " Ammo)`", false);
+            embed.addField('\u200B', '\u200B', true);
+            embed.addField('\u200B', '\u200B', true);
         }
-        if (secondaryWeapon[0].name === 'Melee') {
-            embed.addField("Secondary Slot", "`" + secondaryWeapon[1].name +
-            " (" + secondaryWeapon[2].name + ")`", false);
+
+        embed.addField("Secondary Weapon", "`" + secondaryWeapon[1].name +
+        " (" + secondaryWeapon[2].name + ")`", true);
+
+        // add field for ammo for shootable weapons
+        if (secondaryWeapon[0].name !== 'Melee') {
+            if (secondaryWeapon[1].ammoSlots === 1) {
+                embed.addField("Ammunition", "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "`", true);
+                embed.addField('\u200B', '\u200B', true);
+            }
+
+            if (secondaryWeapon[1].ammoSlots === 2) {
+                embed.addField("Ammunition", "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "` " + 
+                                             "`" + secondaryWeapon[3][1].name + " " + secondaryWeapon[3][1].type + "`", true);
+                embed.addField('\u200B', '\u200B', true);
+            }
         } else {
-            embed.addField("Secondary Slot", "`" + secondaryWeapon[1].name +
-            " (" + secondaryWeapon[2].name + ")" +
-            " (" + secondaryWeapon[3].name + " " + secondaryWeapon[3].type + " Ammo)`", false);
+            embed.addField('\u200B', '\u200B', true);
+            embed.addField('\u200B', '\u200B', true);
         }
+
         embed.addField("Tools", "`" + tools[0][2].name + "`" +
         ", `" + tools[1][2].name + "`" +
         ", `" + tools[2][2].name + "`" +
         ", `" + tools[3][2].name + "`", false);
+        
         embed.addField("Consumables", "`" + consumables[0][2].name + "`" +
         ", `" + consumables[1][2].name + "`" +
         ", `" + consumables[2][2].name + "`" +
@@ -199,7 +232,7 @@ function getItemCount(mode) {
  * 
  * @param {*} itemId 
  * @param {*} mode 
- * @returns [itemGroup, item, variant, ammoType]
+ * @returns [itemGroup, item, variant, ammoTypes]
  */
 function getItem(itemId, mode) {
     var itemCount = 0;
@@ -256,16 +289,48 @@ function getItem(itemId, mode) {
                                 ammoCount++;
                             }
 
-                            // pick ammo type
-                            var ammoId = Math.floor(Math.random() * ammoCount + 1);
-                            ammoCount = 0;
-                            for (var m = 0; m < item.ammoTypes.length; m++) {
-                                ammoCount++;
-                                if (ammoCount === ammoId) {
-                                    var ammoType = item.ammoTypes[m];
-                                    return [itemGroup, item, variant, ammoType];
+                            var ammoTypes = [];
+                            var ammoId;
+                            // pick ammo types
+                            for (var m = 0; m < item.ammoSlots; m++) {
+
+                                // different logic for LeMat
+                                if (item.name === "LeMat Mark II") {
+                                    while (true) {
+                                        ammoId = Math.floor(Math.random() * ammoCount + 1);
+                                        ammoCount = 0;
+
+                                        for (var n = 0; n < item.ammoTypes.length; n++) {
+                                            ammoCount++;
+                                            if (ammoCount === ammoId) {
+                                                ammoTypes[m] = item.ammoTypes[n];
+                                            }
+                                        }
+
+                                        // find compact ammo
+                                        if (m === 0 && ammoTypes[m].type === "Compact" ) {
+                                            break;
+                                        }
+
+                                        // find shotgun ammo
+                                        if (m === 1 && ammoTypes[m].type === "Shotgun" ) {
+                                            break;
+                                        }
+                                    }
+                                } else {
+
+                                    ammoId = Math.floor(Math.random() * ammoCount + 1);
+                                    ammoCount = 0;
+
+                                    for (var n = 0; n < item.ammoTypes.length; n++) {
+                                        ammoCount++;
+                                        if (ammoCount === ammoId) {
+                                            ammoTypes[m] = item.ammoTypes[n];
+                                        }
+                                    }
                                 }
                             }
+                            return [itemGroup, item, variant, ammoTypes];
                         }
                         
                         // return without ammo type for melee weapons
