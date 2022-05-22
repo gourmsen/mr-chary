@@ -62,37 +62,32 @@ module.exports = {
         }
 
         var maxCount = getItemCount("Weapons");
+
         var randomId = 0;
         // get primary weapon
-        var hasAllowedSlots = false;
-        while (!hasAllowedSlots) {
-            randomId = Math.floor(Math.random() * maxCount + 1);
-            primaryWeapon = getItem(randomId, "Weapons");
-
-            hasAllowedSlots = true;
-
-            // +fillSlots (minimum 2 slot weapon)
-            if (argumentFillSlots && primaryWeapon[2].slots < 2) {
-                console.log("+fillSlots: Reroll Primary, because: " + primaryWeapon[1].name, primaryWeapon[2].name, primaryWeapon[2].slots);
-                hasAllowedSlots = false;
-            }
-        }
+        randomId = Math.floor(Math.random() * maxCount + 1);
+        primaryWeapon = getItem(randomId, "Weapons");
 
         // get secondary weapon
-        hasAllowedSlots = false;
+        var hasAllowedSlots = false;
         while (!hasAllowedSlots) {
             randomId = Math.floor(Math.random() * maxCount + 1);
             secondaryWeapon = getItem(randomId, "Weapons");
             var overallSlots = primaryWeapon[2].slots + secondaryWeapon[2].slots;
-            if (overallSlots < 5) {
-                hasAllowedSlots = true;
+            if (overallSlots > 4) {
+                console.log("random.js: Too many slots, re-roll secondary weapon (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondaryWeapon[2].slots + " Slots)");
+                hasAllowedSlots = false;
+                continue;
             }
 
             // +fillSlots (all 4 slots need to be filled)
             if (argumentFillSlots && overallSlots < 4) {
-                console.log("+fillSlots: Reroll Secondary, because: " + secondaryWeapon[1].name, secondaryWeapon[2].name, secondaryWeapon[2].slots);
+                console.log("random.js: +fillSlots: Slots not filled, re-roll secondary (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondaryWeapon[2].slots + " Slots)");
                 hasAllowedSlots = false;
+                continue;
             }
+
+            hasAllowedSlots = true;
         }
 
         // get tools
