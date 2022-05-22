@@ -48,9 +48,9 @@ module.exports = {
                     break;
                 case "-fs":
                 case "--fill-slots":
-                        argumentFillSlots = true;
-                        usedArguments = usedArguments + "+forceKit ";
-                        break;
+                    argumentFillSlots = true;
+                    usedArguments = usedArguments + "+fillSlots ";
+                    break;
                 case "-ad":
                 case "--allow-dual-wield":
                     argumentAllowDualWield = true;
@@ -61,19 +61,37 @@ module.exports = {
             }
         }
 
-        // get primary weapon
         var maxCount = getItemCount("Weapons");
-        var randomId = Math.floor(Math.random() * maxCount + 1);
-        primaryWeapon = getItem(randomId, "Weapons");
+        var randomId = 0;
+        // get primary weapon
+        var hasAllowedSlots = false;
+        while (!hasAllowedSlots) {
+            randomId = Math.floor(Math.random() * maxCount + 1);
+            primaryWeapon = getItem(randomId, "Weapons");
+
+            hasAllowedSlots = true;
+
+            // +fillSlots (minimum 2 slot weapon)
+            if (argumentFillSlots && primaryWeapon[2].slots < 2) {
+                console.log("+fillSlots: Reroll Primary, because: " + primaryWeapon[1].name, primaryWeapon[2].name, primaryWeapon[2].slots);
+                hasAllowedSlots = false;
+            }
+        }
 
         // get secondary weapon
-        var hasAllowedSlots = false;
-        while(!hasAllowedSlots) {
-            var randomId = Math.floor(Math.random() * maxCount + 1);
+        hasAllowedSlots = false;
+        while (!hasAllowedSlots) {
+            randomId = Math.floor(Math.random() * maxCount + 1);
             secondaryWeapon = getItem(randomId, "Weapons");
             var overallSlots = primaryWeapon[2].slots + secondaryWeapon[2].slots;
             if (overallSlots < 5) {
                 hasAllowedSlots = true;
+            }
+
+            // +fillSlots (all 4 slots need to be filled)
+            if (argumentFillSlots && overallSlots < 4) {
+                console.log("+fillSlots: Reroll Secondary, because: " + secondaryWeapon[1].name, secondaryWeapon[2].name, secondaryWeapon[2].slots);
+                hasAllowedSlots = false;
             }
         }
 

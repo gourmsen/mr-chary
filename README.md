@@ -13,7 +13,8 @@ All commands are invoked with `!cry [command] <argument>`
 
 ### Available Commands
 
-| command | arguments     | description                                                       |
-|---------|---------------|-------------------------------------------------------------------|
-| `help`  |               | Prints out a help                                                 |
-| `list`  | `-g\|--group` | Lists all items in the item collection e.g. `!cry list -g=Rifles` |
+| command  | arguments           | description                                                       |
+|----------|---------------------|-------------------------------------------------------------------|
+| `help`   |                     | Prints out a help                                                 |
+| `list`   | `-g\|--group`       | Lists all items in the item collection e.g. `!cry list -g=Rifles` |
+| `random` | `-fs\|--fill-slots` | Generates a random loadout e.g. `!cry random -fs`                 |
