@@ -779,12 +779,12 @@
                         },
                         {
                             "name": "Carbine",
-                            "slots": 2,
+                            "slots": 3,
                             "price": 155
                         },
                         {
                             "name": "Carbine Deadeye",
-                            "slots": 2,
+                            "slots": 3,
                             "price": 211
                         }
                     ],
