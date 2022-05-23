@@ -44,7 +44,7 @@ module.exports = {
                 case "-fk":
                 case "--force-kit":
                     argumentForceKit = true;
-                    usedArguments = usedArguments + "+forceKit ❌ ";
+                    usedArguments = usedArguments + "+forceKit 💉 ";
                     break;
                 case "-fs":
                 case "--fill-slots":
@@ -98,10 +98,10 @@ module.exports = {
             secondaryWeapon = tempWeapon;
         }
 
-        var hasMelee = false;
+        var hasMeleeWeapon = false;
         // check for melee
         if (primaryWeapon[0].name === "Melee" || secondaryWeapon[0].name === "Melee") {
-            hasMelee = true;
+            hasMeleeWeapon = true;
         }
 
         // get tools
@@ -123,6 +123,7 @@ module.exports = {
                     }
                 }
             }
+
             if (hasDuplicates) {
                 console.log("random.js: Tools have duplicates, re-roll tools (" +
                     tools[0][2].name + ", " +
@@ -133,7 +134,11 @@ module.exports = {
             }
 
             // +forceMelee (tools need to have a melee weapon)
-            if (argumentForceMelee && !hasMelee) {
+            var hasMelee = false;
+            if (hasMeleeWeapon === true) {
+                hasMelee = true;
+            }
+            if (argumentForceMelee && !hasMeleeWeapon) {
                 for (var j = 0; j < 4; j++) {
                     if (tools[j][1].name === "Combat Axe" ||
                         tools[j][1].name === "Knife" ||
@@ -141,19 +146,38 @@ module.exports = {
                         hasMelee = true;
                     }
                 }
-
-                if (hasMelee) {
-                    break;
-                } else {
-                    console.log("random.js: +forceMelee: No melee weapon found, re-roll tools (" +
-                        tools[0][2].name + ", " +
-                        tools[1][2].name + ", " +
-                        tools[2][2].name + ", " +
-                        tools[3][2].name + ")");
-                }
-            } else {
-                break;
             }
+
+            var hasKit = false;
+            // +forceKit (tools need to have a first aid kit)
+            if (argumentForceKit) {
+                for (var j = 0; j < 4; j++) {
+                    if (tools[j][1].name === "First Aid Kit") {
+                        hasKit = true;
+                    }
+                }
+            }
+            
+            // check all arguments
+            if (argumentForceMelee && !hasMelee) {
+                console.log("random.js: +forceMelee: No melee weapon found, re-roll tools (" +
+                    tools[0][2].name + ", " +
+                    tools[1][2].name + ", " +
+                    tools[2][2].name + ", " +
+                    tools[3][2].name + ")");
+                continue;
+            }
+
+            if (argumentForceKit && !hasKit) {
+                console.log("random.js: +forceKit: No first aid kit found, re-roll tools (" +
+                    tools[0][2].name + ", " +
+                    tools[1][2].name + ", " +
+                    tools[2][2].name + ", " +
+                    tools[3][2].name + ")");
+                continue;
+            }
+
+            break;
         }
 
         // get consumables
