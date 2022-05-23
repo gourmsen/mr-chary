@@ -39,22 +39,22 @@ module.exports = {
                 case "-fm":
                 case "--force-melee":
                     argumentForceMelee = true;
-                    usedArguments = usedArguments + "+forceMelee ";
+                    usedArguments = usedArguments + "+forceMelee 🔪 ";
                     break;
                 case "-fk":
                 case "--force-kit":
                     argumentForceKit = true;
-                    usedArguments = usedArguments + "+forceKit ";
+                    usedArguments = usedArguments + "+forceKit ❌ ";
                     break;
                 case "-fs":
                 case "--fill-slots":
                     argumentFillSlots = true;
-                    usedArguments = usedArguments + "+fillSlots ";
+                    usedArguments = usedArguments + "+fillSlots 🎰 ";
                     break;
                 case "-ad":
                 case "--allow-dual-wield":
                     argumentAllowDualWield = true;
-                    usedArguments = usedArguments + "+allowDualWield ";
+                    usedArguments = usedArguments + "+allowDualWield ❌ ";
                     break;
                 default:
                     break;
@@ -98,14 +98,64 @@ module.exports = {
             secondaryWeapon = tempWeapon;
         }
 
-        // get tools
-        maxCount = getItemCount("Tools");
-        tools = [];
-        for (var i = 0; i < 4; i++) {
-            randomId = Math.floor(Math.random() * maxCount + 1);
-            tools[i] = getItem(randomId, "Tools");
+        var hasMelee = false;
+        // check for melee
+        if (primaryWeapon[0].name === "Melee" || secondaryWeapon[0].name === "Melee") {
+            hasMelee = true;
         }
-        
+
+        // get tools
+        while (true) {
+            maxCount = getItemCount("Tools");
+            tools = [];
+            for (var i = 0; i < 4; i++) {
+                randomId = Math.floor(Math.random() * maxCount + 1);
+                tools[i] = getItem(randomId, "Tools");
+            }
+
+            // check for duplicates
+            var hasDuplicates = false;
+            for (var i = 0; i < 4; i++) {
+                for (var j = 0; j < 4; j++) {
+                    if (i !== j &&
+                        tools[i][2].name === tools[j][2].name) {
+                            hasDuplicates = true;
+                    }
+                }
+            }
+            if (hasDuplicates) {
+                console.log("random.js: Tools have duplicates, re-roll tools (" +
+                    tools[0][2].name + ", " +
+                    tools[1][2].name + ", " +
+                    tools[2][2].name + ", " +
+                    tools[3][2].name + ")");
+                continue;
+            }
+
+            // +forceMelee (tools need to have a melee weapon)
+            if (argumentForceMelee && !hasMelee) {
+                for (var j = 0; j < 4; j++) {
+                    if (tools[j][1].name === "Combat Axe" ||
+                        tools[j][1].name === "Knife" ||
+                        tools[j][1].name === "Dusters") {
+                        hasMelee = true;
+                    }
+                }
+
+                if (hasMelee) {
+                    break;
+                } else {
+                    console.log("random.js: +forceMelee: No melee weapon found, re-roll tools (" +
+                        tools[0][2].name + ", " +
+                        tools[1][2].name + ", " +
+                        tools[2][2].name + ", " +
+                        tools[3][2].name + ")");
+                }
+            } else {
+                break;
+            }
+        }
+
         // get consumables
         maxCount = getItemCount("Consumables");
         consumables = [];
@@ -118,7 +168,7 @@ module.exports = {
         const embed = new MessageEmbed()
         .setTitle("Random Loadout")
         .setDescription('`' + usedArguments + '`')
-        .setColor("#7e42f5")
+        .setColor("#eb4034")
         .setTimestamp();
         
         embed.addField("Primary Weapon", "`" + primaryWeapon[1].name +
