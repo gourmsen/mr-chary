@@ -1,4 +1,5 @@
 const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
+require('better-logging')(console);
 
 module.exports = {
     name: 'help',

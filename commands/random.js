@@ -1,4 +1,5 @@
 const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
+require('better-logging')(console);
 
 var primaryWeapon;
 var secondaryWeapon;
@@ -69,39 +70,48 @@ module.exports = {
         primaryWeapon = getItem(randomId, "Weapons");
 
         // get secondary weapon
-        var hasAllowedSlots = false;
-        while (!hasAllowedSlots) {
+        var isAllowedWeapon = false;
+        while (!isAllowedWeapon) {
             randomId = Math.floor(Math.random() * maxCount + 1);
             secondaryWeapon = getItem(randomId, "Weapons");
             var overallSlots = primaryWeapon[2].slots + secondaryWeapon[2].slots;
             if (overallSlots > 4) {
-                console.log("random.js: Too many slots, re-roll secondary weapon (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondaryWeapon[2].slots + " Slots)");
-                hasAllowedSlots = false;
+                console.info("random.js: Too many slots, re-roll secondary weapon (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondaryWeapon[2].slots + " Slots)");
+                isAllowedWeapon = false;
                 continue;
             }
 
             // +fillSlots (all 4 slots need to be filled)
             if (argumentFillSlots && overallSlots < 4) {
-                console.log("random.js: +fillSlots: Slots not filled, re-roll secondary (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondaryWeapon[2].slots + " Slots)");
-                hasAllowedSlots = false;
+                console.info("random.js: +fillSlots: Slots not filled, re-roll secondary (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondaryWeapon[2].slots + " Slots)");
+                isAllowedWeapon = false;
                 continue;
             }
 
-            hasAllowedSlots = true;
+            // no double melee weapons
+            if (primaryWeapon[0].name === "Melee" && secondaryWeapon[0].name === "Melee") {
+                console.info("random.js: Double melee weapon, re-roll secondary (" + primaryWeapon[1].name, primaryWeapon[2].name + ", " + secondaryWeapon[1].name, secondaryWeapon[2].name + ")");
+                isAllowedWeapon = false;
+                continue;
+            }
+
+            isAllowedWeapon = true;
         }
 
         // switch weapons if primary occupies less slots
         if (secondaryWeapon[2].slots > primaryWeapon[2].slots) {
-            console.log("random.js: Switched weapon slots, because " + primaryWeapon[1].name, primaryWeapon[2].name + " < " + secondaryWeapon[1].name, secondaryWeapon[2].name);
+            console.info("random.js: Switched weapon slots, because " + primaryWeapon[1].name, primaryWeapon[2].name + " < " + secondaryWeapon[1].name, secondaryWeapon[2].name);
             var tempWeapon = primaryWeapon;
             primaryWeapon = secondaryWeapon;
             secondaryWeapon = tempWeapon;
         }
 
         var hasMeleeWeapon = false;
+        var meleeCountWeapon = 0;
         // check for melee
         if (primaryWeapon[0].name === "Melee" || secondaryWeapon[0].name === "Melee") {
             hasMeleeWeapon = true;
+            meleeCountWeapon++;
         }
 
         // get tools
@@ -125,11 +135,34 @@ module.exports = {
             }
 
             if (hasDuplicates) {
-                console.log("random.js: Tools have duplicates, re-roll tools (" +
+                console.info("random.js: Tools have duplicates, re-roll tools (" +
                     tools[0][2].name + ", " +
                     tools[1][2].name + ", " +
                     tools[2][2].name + ", " +
                     tools[3][2].name + ")");
+                continue;
+            }
+
+            // check for too many melee tools
+            var meleeCount = 0;
+            if (meleeCountWeapon > 0) {
+                meleeCount++;
+            }
+            for (var i = 0; i < 4; i++) {
+                if (tools[i][1].name === "Combat Axe" ||
+                    tools[i][1].name === "Knife" ||
+                    tools[i][1].name === "Dusters") {
+                        meleeCount++;
+                }
+            }
+            if (meleeCount > 2) {
+                console.info("random.js: Too many melee weapons, re-roll tools (" +
+                primaryWeapon[1].name, primaryWeapon[2].name + ", " +
+                secondaryWeapon[1].name, secondaryWeapon[2].name + ", " +
+                tools[0][2].name + ", " +
+                tools[1][2].name + ", " +
+                tools[2][2].name + ", " +
+                tools[3][2].name + ")");
                 continue;
             }
 
@@ -160,7 +193,7 @@ module.exports = {
             
             // check all arguments
             if (argumentForceMelee && !hasMelee) {
-                console.log("random.js: +forceMelee: No melee weapon found, re-roll tools (" +
+                console.info("random.js: +forceMelee: No melee weapon found, re-roll tools (" +
                     tools[0][2].name + ", " +
                     tools[1][2].name + ", " +
                     tools[2][2].name + ", " +
@@ -169,7 +202,7 @@ module.exports = {
             }
 
             if (argumentForceKit && !hasKit) {
-                console.log("random.js: +forceKit: No first aid kit found, re-roll tools (" +
+                console.info("random.js: +forceKit: No first aid kit found, re-roll tools (" +
                     tools[0][2].name + ", " +
                     tools[1][2].name + ", " +
                     tools[2][2].name + ", " +
@@ -295,7 +328,7 @@ function getItemCount(mode) {
             }
         }
     } catch (err) {
-        console.log(err);
+        console.error(err);
     }
     return itemCount;
 }
@@ -414,6 +447,6 @@ function getItem(itemId, mode) {
             }
         }
     } catch (err) {
-        console.log(err);
+        console.error(err);
     }
 }

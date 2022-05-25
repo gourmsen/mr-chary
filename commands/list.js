@@ -1,4 +1,5 @@
 const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
+require('better-logging')(console);
 
 module.exports = {
     name: 'list',
@@ -69,7 +70,7 @@ module.exports = {
                 message.channel.send({ embeds: [embed] });
             }
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 }

@@ -1,4 +1,5 @@
 const fs = require('fs');
+require('better-logging')(console);
 
 const { Client, Intents, Collection } = require("discord.js");
 const client = new Client({
