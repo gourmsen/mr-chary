@@ -31,7 +31,7 @@ module.exports = {
                 case "-bl":
                 case "--bloodline-level":
                     argumentBloodlineLevel = argValue;
-                    usedArguments = usedArguments + "+bloodlineLevel=" + argValue + " ";
+                    usedArguments = usedArguments + "+bloodlineLevel=" + argValue + " 🩸 ";
                     break;
                 default:
                     break;
@@ -61,25 +61,42 @@ module.exports = {
         var maxCount = getItemCount("Weapons");
 
         // get primary weapon
-        var primarySlots = 0;
         var randomId = 0;
-        randomId = Math.floor(Math.random() * maxCount + 1);
-        primaryWeapon = getItem(randomId, "Weapons");
+        var primarySlots = 0;
+        while (true) {
+            randomId = Math.floor(Math.random() * maxCount + 1);
+            primaryWeapon = getItem(randomId, "Weapons");
 
-        // roll for dualies
-        if (primaryWeapon[4]) {
-            primarySlots = primaryWeapon[2].slots * 2;
-            console.info("random.js: Primary are dualies (" + primaryWeapon[1].name, primaryWeapon[2].name, primarySlots + ")");
-        } else {
-            primarySlots = primaryWeapon[2].slots;
+            // +bloodlineLevel (primary has to be equal or lower)
+            if (argumentBloodlineLevel > 0 && argumentBloodlineLevel < 100 &&
+                primaryWeapon[1].bloodlineLevel > argumentBloodlineLevel) {
+                console.info("random.js: +bloodlineLevel: Bloodline level too high, re-roll primary (" + primaryWeapon[1].name, primaryWeapon[2].name + " - " + primaryWeapon[1].bloodlineLevel + ")");
+                continue;
+            }
+    
+            // roll for dualies
+            if (primaryWeapon[4]) {
+                primarySlots = primaryWeapon[2].slots * 2;
+                console.info("random.js: Primary are dualies (" + primaryWeapon[1].name, primaryWeapon[2].name, primarySlots + ")");
+            } else {
+                primarySlots = primaryWeapon[2].slots;
+            }
+
+            break;
         }
 
         // get secondary weapon
         var secondarySlots = 0;
-        var isAllowedWeapon = false;
-        while (!isAllowedWeapon) {
+        while (true) {
             randomId = Math.floor(Math.random() * maxCount + 1);
             secondaryWeapon = getItem(randomId, "Weapons");
+
+            // +bloodlineLevel (secondary has to be equal or lower)
+            if (argumentBloodlineLevel > 0 && argumentBloodlineLevel < 100 &&
+                secondaryWeapon[1].bloodlineLevel > argumentBloodlineLevel) {
+                console.info("random.js: +bloodlineLevel: Bloodline level too high, re-roll secondary (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondaryWeapon[1].bloodlineLevel + ")");
+                continue;
+            }
 
             // roll for dualies
             secondarySlots = 0;
@@ -90,28 +107,26 @@ module.exports = {
                 secondarySlots = secondaryWeapon[2].slots;
             }
 
+            // check for too many slots
             var overallSlots = primarySlots + secondarySlots;
             if (overallSlots > 4) {
-                console.info("random.js: Too many slots, re-roll secondary weapon (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondarySlots + " Slots)");
-                isAllowedWeapon = false;
+                console.info("random.js: Too many slots, re-roll secondary (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondarySlots + " Slots)");
                 continue;
             }
 
             // +fillSlots (all 4 slots need to be filled)
             if (argumentFillSlots && overallSlots < 4) {
                 console.info("random.js: +fillSlots: Slots not filled, re-roll secondary (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondarySlots + " Slots)");
-                isAllowedWeapon = false;
                 continue;
             }
 
             // no double melee weapons
             if (primaryWeapon[0].name === "Melee" && secondaryWeapon[0].name === "Melee") {
                 console.info("random.js: Double melee weapon, re-roll secondary (" + primaryWeapon[1].name, primaryWeapon[2].name + ", " + secondaryWeapon[1].name, secondaryWeapon[2].name + ")");
-                isAllowedWeapon = false;
                 continue;
             }
 
-            isAllowedWeapon = true;
+            break;
         }
 
         // switch weapons if primary occupies less slots
@@ -171,6 +186,7 @@ module.exports = {
                         meleeCount++;
                 }
             }
+
             if (meleeCount > 2) {
                 console.info("random.js: Too many melee weapons, re-roll tools (" +
                 primaryWeapon[1].name, primaryWeapon[2].name + ", " +
@@ -206,6 +222,16 @@ module.exports = {
                     }
                 }
             }
+
+            // +bloodlineLevel (tools need to be in bloodline level bounds)
+            var hasBloodlineLevel = true;
+            if (argumentBloodlineLevel > 0 && argumentBloodlineLevel < 100) {
+                for (var j = 0; j < 4; j++) {
+                    if (tools[j][1].bloodlineLevel > argumentBloodlineLevel) {
+                        hasBloodlineLevel = false;
+                    }
+                }
+            }
             
             // check all arguments
             if (argumentForceMelee && !hasMelee) {
@@ -226,15 +252,47 @@ module.exports = {
                 continue;
             }
 
+            if (argumentBloodlineLevel && !hasBloodlineLevel) {
+                console.info("random.js: +bloodlineLevel: Bloodline level too high, re-roll tools (" +
+                    tools[0][2].name, tools[0][1].bloodlineLevel + ", " +
+                    tools[1][2].name, tools[1][1].bloodlineLevel + ", " +
+                    tools[2][2].name, tools[2][1].bloodlineLevel + ", " +
+                    tools[3][2].name, tools[3][1].bloodlineLevel + ")");
+                continue;
+            }
+
             break;
         }
 
         // get consumables
-        maxCount = getItemCount("Consumables");
-        consumables = [];
-        for (var i = 0; i < 4; i++) {
-            randomId = Math.floor(Math.random() * maxCount + 1);
-            consumables[i] = getItem(randomId, "Consumables");
+        while (true) {
+            maxCount = getItemCount("Consumables");
+            consumables = [];
+            for (var i = 0; i < 4; i++) {
+                randomId = Math.floor(Math.random() * maxCount + 1);
+                consumables[i] = getItem(randomId, "Consumables");
+            }
+
+            // +bloodlineLevel (consumables need to be in bloodline level bounds)
+            var hasBloodlineLevel = true;
+            if (argumentBloodlineLevel > 0 && argumentBloodlineLevel < 100) {
+                for (var j = 0; j < 4; j++) {
+                    if (consumables[j][1].bloodlineLevel > argumentBloodlineLevel) {
+                        hasBloodlineLevel = false;
+                    }
+                }
+            }
+
+            if (argumentBloodlineLevel && !hasBloodlineLevel) {
+                console.info("random.js: +bloodlineLevel: Bloodline level too high, re-roll consumables (" +
+                    consumables[0][2].name, consumables[0][1].bloodlineLevel + ", " +
+                    consumables[1][2].name, consumables[0][1].bloodlineLevel + ", " +
+                    consumables[2][2].name, consumables[0][1].bloodlineLevel + ", " +
+                    consumables[3][2].name, consumables[0][1].bloodlineLevel + ")");
+                continue;
+            }
+
+            break;
         }
 
         // show embed

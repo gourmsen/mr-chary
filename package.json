@@ -1,6 +1,6 @@
 {
   "name": "mr-chary",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Helper for generating loadouts or picking teams.",
   "main": "app.js",
   "scripts": {

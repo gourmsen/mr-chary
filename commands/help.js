@@ -14,7 +14,7 @@ module.exports = {
         .addFields(
             {name: "`!cry help`", value: "Prints this help.", inline: false},
             {name: "`!cry list (-g|--group=<name>)`", value: "Lists all available items.", inline: false},
-            {name: "`!cry random (-fs|--fill-slots) (-fm|--force-melee) (-fk|--force-kit)`", value: "Generates a random loadout.", inline: false}
+            {name: "`!cry random (-fs|--fill-slots) (-fm|--force-melee) (-fk|--force-kit) (-bl|--bloodline-level=<value>)`", value: "Generates a random loadout.", inline: false}
         );
 
         message.channel.send({ embeds: [embed] });
