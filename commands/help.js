@@ -7,7 +7,7 @@ module.exports = {
     execute(message, args) {
 
         const embed = new MessageEmbed()
-        .setTitle("Help")
+        .setTitle("📙 Help")
         .setDescription("List of commands")
         .setColor("#fee75c")
         .setTimestamp()

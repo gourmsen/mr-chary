@@ -6,6 +6,8 @@ var secondaryWeapon;
 var tools;
 var consumables;
 
+const DUALIES_PROBABILITY = 0.33;
+
 module.exports = {
     name: 'random',
     description: "Generates a random loadout!",
@@ -16,7 +18,6 @@ module.exports = {
         var argumentForceMelee = false;
         var argumentForceKit = false;
         var argumentFillSlots = false;
-        var argumentAllowDualWield = false;
         var argumentBloodlineLevel = 0;
 
         // read arguments
@@ -52,11 +53,6 @@ module.exports = {
                     argumentFillSlots = true;
                     usedArguments = usedArguments + "+fillSlots 🎰 ";
                     break;
-                case "-ad":
-                case "--allow-dual-wield":
-                    argumentAllowDualWield = true;
-                    usedArguments = usedArguments + "+allowDualWield ❌ ";
-                    break;
                 default:
                     break;
             }
@@ -64,26 +60,46 @@ module.exports = {
 
         var maxCount = getItemCount("Weapons");
 
-        var randomId = 0;
         // get primary weapon
+        var primarySlots = 0;
+        var randomId = 0;
         randomId = Math.floor(Math.random() * maxCount + 1);
         primaryWeapon = getItem(randomId, "Weapons");
 
+        // roll for dualies
+        if (primaryWeapon[4]) {
+            primarySlots = primaryWeapon[2].slots * 2;
+            console.info("random.js: Primary are dualies (" + primaryWeapon[1].name, primaryWeapon[2].name, primarySlots + ")");
+        } else {
+            primarySlots = primaryWeapon[2].slots;
+        }
+
         // get secondary weapon
+        var secondarySlots = 0;
         var isAllowedWeapon = false;
         while (!isAllowedWeapon) {
             randomId = Math.floor(Math.random() * maxCount + 1);
             secondaryWeapon = getItem(randomId, "Weapons");
-            var overallSlots = primaryWeapon[2].slots + secondaryWeapon[2].slots;
+
+            // roll for dualies
+            secondarySlots = 0;
+            if (secondaryWeapon[4]) {
+                secondarySlots = secondaryWeapon[2].slots * 2;
+                console.info("random.js: Secondary are dualies (" + secondaryWeapon[1].name, secondaryWeapon[2].name, secondarySlots + ")");
+            } else {
+                secondarySlots = secondaryWeapon[2].slots;
+            }
+
+            var overallSlots = primarySlots + secondarySlots;
             if (overallSlots > 4) {
-                console.info("random.js: Too many slots, re-roll secondary weapon (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondaryWeapon[2].slots + " Slots)");
+                console.info("random.js: Too many slots, re-roll secondary weapon (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondarySlots + " Slots)");
                 isAllowedWeapon = false;
                 continue;
             }
 
             // +fillSlots (all 4 slots need to be filled)
             if (argumentFillSlots && overallSlots < 4) {
-                console.info("random.js: +fillSlots: Slots not filled, re-roll secondary (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondaryWeapon[2].slots + " Slots)");
+                console.info("random.js: +fillSlots: Slots not filled, re-roll secondary (" + secondaryWeapon[1].name, secondaryWeapon[2].name + " - " + secondarySlots + " Slots)");
                 isAllowedWeapon = false;
                 continue;
             }
@@ -99,7 +115,7 @@ module.exports = {
         }
 
         // switch weapons if primary occupies less slots
-        if (secondaryWeapon[2].slots > primaryWeapon[2].slots) {
+        if (secondarySlots > primarySlots) {
             console.info("random.js: Switched weapon slots, because " + primaryWeapon[1].name, primaryWeapon[2].name + " < " + secondaryWeapon[1].name, secondaryWeapon[2].name);
             var tempWeapon = primaryWeapon;
             primaryWeapon = secondaryWeapon;
@@ -223,23 +239,29 @@ module.exports = {
 
         // show embed
         const embed = new MessageEmbed()
-        .setTitle("Random Loadout")
+        .setTitle("🎲 Random Loadout")
         .setDescription('`' + usedArguments + '`')
         .setColor("#eb4034")
         .setTimestamp();
         
-        embed.addField("Primary Weapon", "`" + primaryWeapon[1].name +
-        " (" + primaryWeapon[2].name + ")`", true);
+        // add primary weapon as dualies or solo
+        if (primaryWeapon[4]) {
+            embed.addField("🥇 Primary Weapon", "`2x " + primaryWeapon[1].name +
+            " (" + primaryWeapon[2].name + ")`", true);
+        } else {
+            embed.addField("🥇 Primary Weapon", "`" + primaryWeapon[1].name +
+            " (" + primaryWeapon[2].name + ")`", true);
+        }
 
         // add field for ammo for shootable weapons
         if (primaryWeapon[0].name !== 'Melee') {
             if (primaryWeapon[1].ammoSlots === 1) {
-                embed.addField("Ammunition", "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "`", true);
+                embed.addField("🔫 Ammunition", "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "`", true);
                 embed.addField('\u200B', '\u200B', true);
             }
 
             if (primaryWeapon[1].ammoSlots === 2) {
-                embed.addField("Ammunition", "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "` " + 
+                embed.addField("🔫 Ammunition", "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "` " + 
                                              "`" + primaryWeapon[3][1].name + " " + primaryWeapon[3][1].type + "`", true);
                 embed.addField('\u200B', '\u200B', true);
             }
@@ -248,18 +270,24 @@ module.exports = {
             embed.addField('\u200B', '\u200B', true);
         }
 
-        embed.addField("Secondary Weapon", "`" + secondaryWeapon[1].name +
-        " (" + secondaryWeapon[2].name + ")`", true);
+        // add secondary weapon as dualies or solo
+        if (secondaryWeapon[4]) {
+            embed.addField("🥈 Secondary Weapon", "`2x " + secondaryWeapon[1].name +
+            " (" + secondaryWeapon[2].name + ")`", true);
+        } else {
+            embed.addField("🥈 Secondary Weapon", "`" + secondaryWeapon[1].name +
+            " (" + secondaryWeapon[2].name + ")`", true);
+        }
 
         // add field for ammo for shootable weapons
         if (secondaryWeapon[0].name !== 'Melee') {
             if (secondaryWeapon[1].ammoSlots === 1) {
-                embed.addField("Ammunition", "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "`", true);
+                embed.addField("🔫 Ammunition", "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "`", true);
                 embed.addField('\u200B', '\u200B', true);
             }
 
             if (secondaryWeapon[1].ammoSlots === 2) {
-                embed.addField("Ammunition", "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "` " + 
+                embed.addField("🔫 Ammunition", "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "` " + 
                                              "`" + secondaryWeapon[3][1].name + " " + secondaryWeapon[3][1].type + "`", true);
                 embed.addField('\u200B', '\u200B', true);
             }
@@ -268,12 +296,12 @@ module.exports = {
             embed.addField('\u200B', '\u200B', true);
         }
 
-        embed.addField("Tools", "`" + tools[0][2].name + "`" +
+        embed.addField("🛠️ Tools", "`" + tools[0][2].name + "`" +
         ", `" + tools[1][2].name + "`" +
         ", `" + tools[2][2].name + "`" +
         ", `" + tools[3][2].name + "`", false);
         
-        embed.addField("Consumables", "`" + consumables[0][2].name + "`" +
+        embed.addField("🍔 Consumables", "`" + consumables[0][2].name + "`" +
         ", `" + consumables[1][2].name + "`" +
         ", `" + consumables[2][2].name + "`" +
         ", `" + consumables[3][2].name + "`", false);
@@ -437,7 +465,16 @@ function getItem(itemId, mode) {
                                     }
                                 }
                             }
-                            return [itemGroup, item, variant, ammoTypes];
+
+                            // determine whether weapon comes in dualies
+                            var dualies = false;
+                            if (itemGroup.name === "Pistols" &&
+                                variant.slots  === 1) {
+                                if (Math.random() < DUALIES_PROBABILITY) {
+                                    dualies = true;
+                                }
+                            }
+                            return [itemGroup, item, variant, ammoTypes, dualies];
                         }
                         
                         // return without ammo type for melee weapons

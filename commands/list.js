@@ -46,7 +46,7 @@ module.exports = {
                 }
 
                 const embed = new MessageEmbed()
-                    .setTitle(itemGroup.name)
+                    .setTitle("📘 " + itemGroup.name)
                     .setDescription("List of items in group `" + itemGroup.name + "`")
                     .setColor("#5699c7")
                     .setTimestamp();

@@ -35,6 +35,9 @@ client.on('messageCreate', message => {
         case 'help':
             client.commands.get('help').execute(message, args);
             break;
+        case 'version':
+            client.commands.get('version').execute(message, args);
+            break;
         case 'list':
             client.commands.get('list').execute(message, args);
             break;
