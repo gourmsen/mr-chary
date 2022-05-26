@@ -7,6 +7,7 @@
                 {
                     "name": "Winfield 1873C",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Normal",
@@ -65,6 +66,7 @@
                 {
                     "name": "Springfield 1866",
                     "ammoSlots": 2,
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Normal",
@@ -113,6 +115,7 @@
                 {
                     "name": "Vetterli 71 Karabiner",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 6,
                     "variants": [
                         {
                             "name": "Normal",
@@ -166,6 +169,7 @@
                 {
                     "name": "Martini-Henry IC1",
                     "ammoSlots": 2,
+                    "bloodlineLevel": 16,
                     "variants": [
                         {
                             "name": "Normal",
@@ -214,6 +218,7 @@
                 {
                     "name": "Winfield 1873",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 20,
                     "variants": [
                         {
                             "name": "Normal",
@@ -267,6 +272,7 @@
                 {
                     "name": "Sparks LRR",
                     "ammoSlots": 2,
+                    "bloodlineLevel": 26,
                     "variants": [
                         {
                             "name": "Normal",
@@ -310,6 +316,7 @@
                 {
                     "name": "Lebel 1886",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 52,
                     "variants": [
                         {
                             "name": "Normal",
@@ -353,6 +360,7 @@
                 {
                     "name": "Berthier Mle 1892",
                     "ammoSlots": 2,
+                    "bloodlineLevel": 62,
                     "variants": [
                         {
                             "name": "Normal",
@@ -391,6 +399,7 @@
                 {
                     "name": "Winfield M1876 Centennial",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 58,
                     "variants": [
                         {
                             "name": "Normal",
@@ -424,6 +433,7 @@
                 {
                     "name": "Mosin-Nagant M1891",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 72,
                     "variants": [
                         {
                             "name": "Normal",
@@ -482,6 +492,7 @@
                 {
                     "name": "Nitro Express Rifle",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 88,
                     "variants": [
                         {
                             "name": "Normal",
@@ -515,6 +526,7 @@
                 {
                     "name": "Nagant M1895",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Normal",
@@ -558,6 +570,7 @@
                 {
                     "name": "Scottfield No. 3",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Normal",
@@ -606,6 +619,7 @@
                 {
                     "name": "Caldwell 92 New Army",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 12,
                     "variants": [
                         {
                             "name": "Normal",
@@ -634,6 +648,7 @@
                 {
                     "name": "Caldwell Pax",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 18,
                     "variants": [
                         {
                             "name": "Normal",
@@ -667,6 +682,7 @@
                 {
                     "name": "Caldwell Conversion Pistol",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 22,
                     "variants": [
                         {
                             "name": "Normal",
@@ -700,6 +716,7 @@
                 {
                     "name": "Caldwell Conversion Uppercut",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 22,
                     "variants": [
                         {
                             "name": "Normal",
@@ -728,6 +745,7 @@
                 {
                     "name": "Bornheim No. 3",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 30,
                     "variants": [
                         {
                             "name": "Normal",
@@ -766,6 +784,7 @@
                 {
                     "name": "Nagant M1895 Officer",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 36,
                     "variants": [
                         {
                             "name": "Normal",
@@ -809,6 +828,7 @@
                 {
                     "name": "LeMat Mark II",
                     "ammoSlots": 2,
+                    "bloodlineLevel": 46,
                     "variants": [
                         {
                             "name": "Normal",
@@ -857,6 +877,7 @@
                 {
                     "name": "Dolch 96",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 68,
                     "variants": [
                         {
                             "name": "Normal",
@@ -885,6 +906,7 @@
                 {
                     "name": "Romero 77",
                     "ammoSlots": 2,
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Normal",
@@ -938,6 +960,7 @@
                 {
                     "name": "Caldwell Rival 78",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 10,
                     "variants": [
                         {
                             "name": "Normal",
@@ -976,6 +999,7 @@
                 {
                     "name": "Specter 1882",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 24,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1024,6 +1048,7 @@
                 {
                     "name": "Winfield 1893 Slate",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 48,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1052,6 +1077,7 @@
                 {
                     "name": "Winfield 1887 Terminus",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 64,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1095,6 +1121,7 @@
                 {
                     "name": "Crown & King Auto-5",
                     "ammoSlots": 1,
+                    "bloodlineLevel": 82,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1127,6 +1154,7 @@
             "items": [
                 {
                     "name": "Combat Axe",
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1137,6 +1165,7 @@
                 },
                 {
                     "name": "Machete",
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1147,6 +1176,7 @@
                 },
                 {
                     "name": "Cavalry Saber",
+                    "bloodlineLevel": 42,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1157,6 +1187,7 @@
                 },
                 {
                     "name": "Bomb Lance",
+                    "bloodlineLevel": 78,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1173,6 +1204,7 @@
                 {
                     "name": "Hand Crossbow",
                     "ammoSlots": 2,
+                    "bloodlineLevel": 4,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1206,6 +1238,7 @@
                 {
                     "name": "Crossbow",
                     "ammoSlots": 2,
+                    "bloodlineLevel": 4,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1234,6 +1267,7 @@
                 {
                     "name": "Hunting Bow",
                     "ammoSlots": 2,
+                    "bloodlineLevel": 54,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1271,6 +1305,7 @@
             "items": [
                 {
                     "name": "Combat Axe",
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Throwing Axes",
@@ -1280,6 +1315,7 @@
                 },
                 {
                     "name": "Knife",
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Knife",
@@ -1297,6 +1333,7 @@
                 },
                 {
                     "name": "Light",
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Electrical Lamp",
@@ -1314,6 +1351,7 @@
                 },
                 {
                     "name": "First Aid Kit",
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "First Aid Kit",
@@ -1323,6 +1361,7 @@
                 },
                 {
                     "name": "Dusters",
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Dusters",
@@ -1336,6 +1375,7 @@
                 },
                 {
                     "name": "Poison",
+                    "bloodlineLevel": 2,
                     "variants": [
                         {
                             "name": "Poison Trip Mines",
@@ -1345,6 +1385,7 @@
                 },
                 {
                     "name": "Choke Bomb",
+                    "bloodlineLevel": 10,
                     "variants": [
                         {
                             "name": "Choke Bomb",
@@ -1354,6 +1395,7 @@
                 },
                 {
                     "name": "Deception",
+                    "bloodlineLevel": 32,
                     "variants": [
                         {
                             "name": "Decoys",
@@ -1375,6 +1417,7 @@
                 },
                 {
                     "name": "Tactical Gadgets",
+                    "bloodlineLevel": 40,
                     "variants": [
                         {
                             "name": "Concertina Trip Mines",
@@ -1384,6 +1427,7 @@
                 },
                 {
                     "name": "Spyglass",
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Spyglass",
@@ -1393,6 +1437,7 @@
                 },
                 {
                     "name": "Quad Derringer",
+                    "bloodlineLevel": 66,
                     "variants": [
                         {
                             "name": "Quad Derringer",
@@ -1407,6 +1452,7 @@
             "items": [
                 {
                     "name": "Healing Shots",
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Vitality Shot (Weak)",
@@ -1436,6 +1482,7 @@
                 },
                 {
                     "name": "Poison",
+                    "bloodlineLevel": 2,
                     "variants": [
                         {
                             "name": "Antidote Shot (Weak)",
@@ -1457,6 +1504,7 @@
                 },
                 {
                     "name": "Fire",
+                    "bloodlineLevel": 3,
                     "variants": [
                         {
                             "name": "Fire Bomb",
@@ -1474,6 +1522,7 @@
                 },
                 {
                     "name": "Explosives",
+                    "bloodlineLevel": 8,
                     "variants": [
                         {
                             "name": "Dynamite Stick",
@@ -1503,6 +1552,7 @@
                 },
                 {
                     "name": "Deception",
+                    "bloodlineLevel": 32,
                     "variants": [
                         {
                             "name": "Chaos Bomb",
@@ -1512,6 +1562,7 @@
                 },
                 {
                     "name": "Tactical Gadgets",
+                    "bloodlineLevel": 40,
                     "variants": [
                         {
                             "name": "Flash Bomb",
@@ -1525,6 +1576,7 @@
                 },
                 {
                     "name": "Restock",
+                    "bloodlineLevel": 80,
                     "variants": [
                         {
                             "name": "Ammo Box",
