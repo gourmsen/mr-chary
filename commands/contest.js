@@ -495,7 +495,7 @@ function printContestSheet(contestId) {
     // display objectives example
     var objectivesStringExample = "";
     for (var i = 0; i < contestData.contest.objectives.length; i++) {
-        objectivesStringExample = objectivesStringExample + (i + 1) + ' ';
+        objectivesStringExample = objectivesStringExample + (i + 1) + '=' + ((Math.floor(Math.random() * 5)) + 1) + ' ';
     }
 
     // display contest state
