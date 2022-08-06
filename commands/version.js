@@ -8,10 +8,11 @@ module.exports = {
 
         const embed = new MessageEmbed()
         .setTitle("📕 Version History")
-        .setDescription("Version `0.2.6`")
+        .setDescription("Version `0.3.0`")
         .setColor("#a844ff")
         .setTimestamp()
         .addFields(
+            {name: "> 0.3", value: "`0.3.0` - Added basic contest system.", inline: false},
             {name: "> 0.2", value: "" +
                                    "Added `+bloodlineLevel` argument `(0.2.6)`. \n" +
                                    "Added dualies functionality `(0.2.5)`. \n" +
