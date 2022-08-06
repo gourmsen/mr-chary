@@ -14,7 +14,7 @@ module.exports = {
     execute(message, args) {
         var usedArguments = "Arguments: ";
 
-        // TODO: Implement arguments
+        // Implement arguments
         var argumentForceMelee = false;
         var argumentForceKit = false;
         var argumentFillSlots = false;
