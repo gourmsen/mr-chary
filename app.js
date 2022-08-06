@@ -32,15 +32,23 @@ client.on('messageCreate', message => {
     let command = args.shift().toLowerCase();
 
     switch (command) {
+        case 'h':
         case 'help':
             client.commands.get('help').execute(message, args);
             break;
+        case 'v':
         case 'version':
             client.commands.get('version').execute(message, args);
             break;
+        case 'c':
+        case 'contest':
+            client.commands.get('contest').execute(message, args);
+            break;
+        case 'l':
         case 'list':
             client.commands.get('list').execute(message, args);
             break;
+        case 'r':
         case 'random':
             client.commands.get('random').execute(message, args);
             break;
