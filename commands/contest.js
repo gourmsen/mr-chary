@@ -17,10 +17,9 @@ const ERR_SAME_STATE = 7;
 const ERR_DEAD_CONTEST = 8;
 const ERR_NOT_STARTED = 9;
 const ERR_MAXIMUM_ENTRIES = 10;
-const ERR_ALL_VALUES = 11;
-const ERR_NOT_NUMERIC = 12;
-const ERR_NOT_ATTENDING = 13;
-const ERR_NOT_OPEN = 14;
+const ERR_NOT_NUMERIC = 11;
+const ERR_NOT_ATTENDING = 12;
+const ERR_NOT_OPEN = 13;
 
 module.exports = {
     name: 'contest',
@@ -371,25 +370,39 @@ function addEntry() {
                 entryId = crypto.randomBytes(5).toString("hex");
             }
 
-            // check, whether all values have been entered
-            if (ARGS.length < contestData.contest.objectives.length + 2) {
-                MESSAGE.channel.send("Enter a value for each objective...");
-                return ERR_ALL_VALUES;
-            }
-
             // prepare entry data
+            var objectiveId, objectiveValue;
             var entryValues = [];
             for (var j = 0; j < contestData.contest.objectives.length; j++) {
 
-                // check numeric
-                if (isNaN(ARGS[j + 2])) {
-                    MESSAGE.channel.send("Enter a numeric value for objective '" + contestData.contest.objectives[j].name + "'...");
-                    return ERR_NOT_NUMERIC;
+                // check, whether objective is in arguments and fill value
+                for (var k = 2; k < ARGS.length; k++) {
+                    objectiveId = ARGS[k].substr(0, ARGS[k].indexOf('='));
+
+                    // check numeric
+                    if (isNaN(objectiveId)) {
+                        MESSAGE.channel.send("Objective ID `" + objectiveId + "` is not numeric...");
+                        return ERR_NOT_NUMERIC;
+                    }
+
+                    if (objectiveId - 1 === j) {
+                        objectiveValue = ARGS[k].split('=')[1];
+
+                        // check numeric
+                        if (isNaN(objectiveValue)) {
+                            MESSAGE.channel.send("Enter a numeric value for objective ID`" + objectiveId + "`...");
+                            return ERR_NOT_NUMERIC;
+                        }
+
+                        break;
+                    } else {
+                        objectiveValue = "0";
+                    }
                 }
 
                 valueData = {
                     "objective": contestData.contest.objectives[j].name,
-                    "value": ARGS[j + 2]
+                    "value": objectiveValue
                 }
 
                 entryValues.push(valueData);
@@ -477,7 +490,6 @@ function printContestSheet(contestId) {
     // create embed
     const embed = new MessageEmbed()
     .setDescription("")
-    .setColor("#ff0099")
     .setTimestamp();
 
     // display objectives example
@@ -489,20 +501,24 @@ function printContestSheet(contestId) {
     // display contest state
     switch(contestData.contest.state) {
         case STAT_OPEN:
-            embed.setTitle("🟦 Contest (" + contestId + ") - `OPEN`")
+            embed.setTitle("Contest (" + contestId + ") - `OPEN`")
             embed.setDescription("Join with `!cry contest join " + contestId + '`');
+            embed.setColor("#00ccff");
             break;
         case STAT_STARTED:
-            embed.setTitle("🟩 Contest (" + contestId + ") - `STARTED`")
+            embed.setTitle("Contest (" + contestId + ") - `STARTED`")
             embed.setDescription("Add entries with the scored amount for each objective like `!cry contest add " + contestId + " " + objectivesStringExample + '`');
+            embed.setColor("#99ff99");
             break;
         case STAT_CLOSED:
-            embed.setTitle("🟥 Contest (" + contestId + ") - `CLOSED`")
+            embed.setTitle("Contest (" + contestId + ") - `CLOSED`")
             embed.setDescription("This contest is over");
+            embed.setColor("#ff3300");
             break;
         default:
-            embed.setTitle("⬜ Contest (" + contestId + ")")
+            embed.setTitle("Contest (" + contestId + ")")
             embed.setDescription("");
+            embed.setColor("#ffffff");
             break;
     }
 
@@ -527,7 +543,8 @@ function printContestSheet(contestId) {
     var attendeesString = "";
     for (var i = 0; i < contestData.attendees.length; i++) {
         overallPoints = calculatePoints(contestData.contest.id, contestData.attendees[i].id);
-        attendeesString = attendeesString + '• ' + contestData.attendees[i].name + ' (' + overallPoints + ' Points)\n';
+        overallPointsRounded = Math.round(overallPoints * 100) / 100;
+        attendeesString = attendeesString + '• ' + contestData.attendees[i].name + ' (' + overallPointsRounded + ' Points)\n';
     }
 
     if (attendeesString !== "") {
@@ -562,6 +579,11 @@ function calculatePoints(contestId, attendeeId) {
 function checkFinished(contestId) {
     var contestData = getContestData(contestId);
     if (contestData === ERR_CONTEST_NOT_FOUND) return;
+
+    // no auto-finish in event mode
+    if (contestData.contest.entryCount == 0) {
+        return false;
+    }
 
     var isFinished = true;
     for (var i = 0; i < contestData.attendees.length; i++) {
