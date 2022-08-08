@@ -495,7 +495,7 @@ function printContestSheet(contestId) {
     // display objectives example
     var objectivesStringExample = "";
     for (var i = 0; i < contestData.contest.objectives.length; i++) {
-        objectivesStringExample = objectivesStringExample + (i + 1) + '=' + ((Math.floor(Math.random() * 5)) + 1) + ' ';
+        objectivesStringExample = objectivesStringExample + ' ' + (i + 1) + '=' + ((Math.floor(Math.random() * 5)) + 1);
     }
 
     // display contest state
@@ -507,7 +507,7 @@ function printContestSheet(contestId) {
             break;
         case STAT_STARTED:
             embed.setTitle("Contest (" + contestId + ") - `STARTED`")
-            embed.setDescription("Add entries with the scored amount for each objective like `!cry contest add " + contestId + " " + objectivesStringExample + '`');
+            embed.setDescription("Add entries with the scored amount for each objective like `!cry contest add " + contestId + objectivesStringExample + '`');
             embed.setColor("#99ff99");
             break;
         case STAT_CLOSED:
