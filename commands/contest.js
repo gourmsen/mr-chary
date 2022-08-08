@@ -501,22 +501,22 @@ function printContestSheet(contestId) {
     // display contest state
     switch(contestData.contest.state) {
         case STAT_OPEN:
-            embed.setTitle("Contest (" + contestId + ") - `OPEN`")
+            embed.setTitle("Contest `[" + contestId + "]` - `[OPEN]`")
             embed.setDescription("Join with `!cry contest join " + contestId + '`');
             embed.setColor("#00ccff");
             break;
         case STAT_STARTED:
-            embed.setTitle("Contest (" + contestId + ") - `STARTED`")
+            embed.setTitle("Contest `[" + contestId + "]` - `[STARTED]`")
             embed.setDescription("Add entries with the scored amount for each objective like `!cry contest add " + contestId + objectivesStringExample + '`');
             embed.setColor("#99ff99");
             break;
         case STAT_CLOSED:
-            embed.setTitle("Contest (" + contestId + ") - `CLOSED`")
+            embed.setTitle("Contest `[" + contestId + "]` - `[CLOSED]`")
             embed.setDescription("This contest is over");
             embed.setColor("#ff3300");
             break;
         default:
-            embed.setTitle("Contest (" + contestId + ")")
+            embed.setTitle("Contest `[" + contestId + "]`")
             embed.setDescription("");
             embed.setColor("#ffffff");
             break;
@@ -524,9 +524,9 @@ function printContestSheet(contestId) {
 
     // display entry count (mode)
     if (contestData.contest.entryCount > 0) {
-        embed.addField("🏅 Tournament Mode", "Limited to " + contestData.contest.entryCount + " entries per attendee", false);
+        embed.addField("Tournament Mode 🏅", "Limited to " + contestData.contest.entryCount + " entries per attendee", false);
     } else {
-        embed.addField("🎪 Event Mode", "Unlimited entries per attendee", false);
+        embed.addField("Event Mode 🎪", "Unlimited entries per attendee", false);
     }
 
     // display objectives
@@ -535,20 +535,76 @@ function printContestSheet(contestId) {
         objectivesString = objectivesString + '`[' + (i + 1) + ']` ' + contestData.contest.objectives[i].name + ' (' + contestData.contest.objectives[i].value + ' Points)\n';
     }
 
-    embed.addField("🎗️ Objectives", objectivesString, false);
+    embed.addField("Objectives 🎗️ ", objectivesString, false);
 
     // displays attendees
-    var overallPoints;
+    var attendeePoints, attendeePointsRounded;
+    var attendees = [];
+    for (var i = 0; i < contestData.attendees.length; i++) {
+
+        // calculate points
+        attendeePoints = calculatePoints(contestData.contest.id, contestData.attendees[i].id);
+        attendeePointsRounded = Math.round(attendeePoints * 100) / 100;
+
+        var attendeeData = {
+            "name": contestData.attendees[i].name,
+            "points": attendeePointsRounded
+        }
+        attendees.push(attendeeData);
+    }
+
+    var sortedAttendees = sortAttendees(attendees);
+
+    var podiumString = "";
+    var place = 0;
+    for (var i = 0; i < sortedAttendees.length; i++) {
+
+        // check for points
+        if (sortedAttendees[i].points <= 0) {
+            continue;
+        }
+
+        // check for same medal
+        if (i > 0) {
+            if (sortedAttendees[i - 1].points > sortedAttendees[i].points) {
+                place++;
+            }
+
+            // only display first, second and third
+            if (place > 2) {
+                break;
+            }
+        }
+
+        // display medal
+        switch (place) {
+            case 0:
+                podiumString = podiumString + '🥇 ';
+                break;
+            case 1:
+                podiumString = podiumString + '🥈 ';
+                break;
+            case 2:
+                podiumString = podiumString + '🥉 ';
+                break;
+            default:
+                break;
+        }
+
+        podiumString = podiumString + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
+    }
+
+    if (podiumString !== "") {
+        embed.addField("Podium 🔥", podiumString, false);
+    }
 
     var attendeesString = "";
-    for (var i = 0; i < contestData.attendees.length; i++) {
-        overallPoints = calculatePoints(contestData.contest.id, contestData.attendees[i].id);
-        overallPointsRounded = Math.round(overallPoints * 100) / 100;
-        attendeesString = attendeesString + '• ' + contestData.attendees[i].name + ' (' + overallPointsRounded + ' Points)\n';
+    for (var i = 0; i < sortedAttendees.length; i++) {
+        attendeesString = attendeesString + '• ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
     }
 
     if (attendeesString !== "") {
-        embed.addField("🤠 Attendees", attendeesString, false);
+        embed.addField("Attendees 🤠", attendeesString, false);
     }
 
     MESSAGE.channel.send({ embeds: [embed] });
@@ -574,6 +630,20 @@ function calculatePoints(contestId, attendeeId) {
         }
     }
     return points;
+}
+
+function sortAttendees(attendees) {
+    var sortedAttendees = attendees.sort((a, b) => {
+        if (a.points < b.points) {
+            return 1
+        }
+        if (a.points > b.points) {
+            return -1
+        }
+        return 0
+    });
+
+    return sortedAttendees;
 }
 
 function checkFinished(contestId) {
