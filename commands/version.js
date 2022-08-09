@@ -12,7 +12,9 @@ module.exports = {
         .setColor("#a844ff")
         .setTimestamp()
         .addFields(
-            {name: "> 0.3", value: "`0.3.0` - Added basic contest system.", inline: false},
+            {name: "> 0.3", value: "" +
+                                   "Added personal statistics (`0.3.1`). \n" +
+                                   "Added basic contest system (`0.3.0`).", inline: false},
             {name: "> 0.2", value: "" +
                                    "Added `+bloodlineLevel` argument `(0.2.6)`. \n" +
                                    "Added dualies functionality `(0.2.5)`. \n" +
@@ -23,7 +25,7 @@ module.exports = {
                                    "Added `+fillSlots` argument `(0.2.1)`. \n" +
                                    "Added random loadout generator `(0.2.0)`.",
                                     inline: false},
-            {name: "> 0.1", value: "`0.1.0` - Added basic list functionality.", inline: false},
+            {name: "> 0.1", value: "Added basic list functionality `(0.1.0)`.", inline: false},
         );
 
         message.channel.send({ embeds: [embed] });

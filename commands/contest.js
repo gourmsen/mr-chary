@@ -53,6 +53,10 @@ module.exports = {
             case "list":
                 listContests();
                 break;
+            case "p":
+            case "personal":
+                personalStats();
+                break;
 
             // states
             case "s":
@@ -139,6 +143,7 @@ function createContest() {
             "authorId": contestAuthorId,
             "authorName": contestAuthorName,
             "entryCount": contestEntryCount,
+            "rated": false,
             "objectives": contestObjectives
         },
         "attendees": []
@@ -193,8 +198,7 @@ function joinContest() {
 }
 
 function infoContest() {
-    var contestId;
-    var contestData;
+    var contestId, contestData;
     
     contestId = ARGS[1];
 
@@ -261,12 +265,74 @@ function listContests() {
     const embed = new MessageEmbed()
     .setTitle("📄 Contest List")
     .setDescription("🟦 Open (Can be joined)\n🟩 Started (Can't be joined)\n🟥 Closed (Archived)")
-    .setColor("#ff0099")
+    .setColor("#6666ff")
     .setTimestamp();
 
     embed.addField("Contests", contestsString, false);
 
     MESSAGE.channel.send({ embeds: [embed] });
+}
+
+function personalStats() {
+    var contestId, contestData;
+    
+    contestId = ARGS[1];
+
+    contestData = getContestData(contestId);
+    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+
+    var isAttending = false;
+    for (var i = 0; i < contestData.attendees.length; i++) {
+        if (contestData.attendees[i].id === MESSAGE.author.id) {
+            isAttending = true;
+
+            // show embed
+            const embed = new MessageEmbed()
+            .setTitle("🤠 Personal Statistics")
+            .setDescription("Logged for contest `" + contestId + '`')
+            .setColor("#6666ff")
+            .setTimestamp();
+
+            // prepare entries
+            var entriesString = "";
+            for (var j = 0; j < contestData.attendees[i].entries.length; j++) {
+                entriesString = entriesString + '`' + contestData.attendees[i].entries[j].id + ':` ';
+
+                // entry values
+                for (var k = 0; k < contestData.attendees[i].entries[j].values.length; k++) {
+                    entriesString = entriesString + '`' + contestData.attendees[i].entries[j].values[k].value + 'x ' + contestData.attendees[i].entries[j].values[k].objective + '` ';
+                }
+
+                entriesString = entriesString + '\n';
+            }
+
+            if (entriesString) {
+                embed.addField("Entries", entriesString, false);
+            }
+
+            // prepare statistics
+            var objectiveStatistics = new Array(contestData.contest.objectives.length).fill(Number(0));
+            for (var j = 0; j < contestData.attendees[i].entries.length; j++) {
+                for (var k = 0; k < contestData.attendees[i].entries[j].values.length; k++) {
+                    objectiveStatistics[k] = objectiveStatistics[k] + Number(contestData.attendees[i].entries[j].values[k].value);
+                }
+            }
+
+            for (var j = 0; j < contestData.contest.objectives.length; j++) {
+                if (objectiveStatistics != 0) {
+                    embed.addField(contestData.contest.objectives[j].name, objectiveStatistics[j].toString(), false);
+                }
+            }
+
+            MESSAGE.channel.send({ embeds: [embed] });
+        }
+    }
+
+    // check for attendance
+    if (!isAttending) {
+        MESSAGE.channel.send("You're not attending this contest...");
+        return ERR_NOT_ATTENDING;
+    }
 }
 
 function stateContest(state) {
@@ -498,25 +564,31 @@ function printContestSheet(contestId) {
         objectivesStringExample = objectivesStringExample + ' ' + (i + 1) + '=' + ((Math.floor(Math.random() * 5)) + 1);
     }
 
+    // prepare rated symbol
+    var ratedString = "";
+    if (contestData.contest.rated === true) {
+        ratedString = " • `⭐`";
+    }
+
     // display contest state
     switch(contestData.contest.state) {
         case STAT_OPEN:
-            embed.setTitle("Contest `[" + contestId + "]` - `[OPEN]`")
+            embed.setTitle("Contest `[" + contestId + "]` • `[OPEN]`" + ratedString);
             embed.setDescription("Join with `!cry contest join " + contestId + '`');
             embed.setColor("#00ccff");
             break;
         case STAT_STARTED:
-            embed.setTitle("Contest `[" + contestId + "]` - `[STARTED]`")
+            embed.setTitle("Contest `[" + contestId + "]` • `[STARTED]`" + ratedString);
             embed.setDescription("Add entries with the scored amount for each objective like `!cry contest add " + contestId + objectivesStringExample + '`');
             embed.setColor("#99ff99");
             break;
         case STAT_CLOSED:
-            embed.setTitle("Contest `[" + contestId + "]` - `[CLOSED]`")
+            embed.setTitle("Contest `[" + contestId + "]` • `[CLOSED]`" + ratedString);
             embed.setDescription("This contest is over");
-            embed.setColor("#ff3300");
+            embed.setColor("#ff0000");
             break;
         default:
-            embed.setTitle("Contest `[" + contestId + "]`")
+            embed.setTitle("Contest `[" + contestId + "]` • `[UNDEFINED]`" + ratedString);
             embed.setDescription("");
             embed.setColor("#ffffff");
             break;
@@ -557,6 +629,7 @@ function printContestSheet(contestId) {
 
     var podiumString = "";
     var place = 0;
+    var position = 0;
     for (var i = 0; i < sortedAttendees.length; i++) {
 
         // check for points
@@ -566,8 +639,10 @@ function printContestSheet(contestId) {
 
         // check for same medal
         if (i > 0) {
+            position++;
+
             if (sortedAttendees[i - 1].points > sortedAttendees[i].points) {
-                place++;
+                place = position;
             }
 
             // only display first, second and third
