@@ -304,65 +304,125 @@ module.exports = {
         
         // add primary weapon as dualies or solo
         if (primaryWeapon[4]) {
-            embed.addField("🥇 Primary Weapon", "`2x " + primaryWeapon[1].name +
-            " (" + primaryWeapon[2].name + ")`", true);
+            embed.addFields({
+                name: "🥇 Primary Weapon",
+                value: "`2x " + primaryWeapon[1].name + " (" + primaryWeapon[2].name + ")`",
+                inline: true
+            });
         } else {
-            embed.addField("🥇 Primary Weapon", "`" + primaryWeapon[1].name +
-            " (" + primaryWeapon[2].name + ")`", true);
+            embed.addFields({
+                name: "🥇 Primary Weapon",
+                value: "`" + primaryWeapon[1].name + " (" + primaryWeapon[2].name + ")`",
+                inline: true
+            });
         }
 
         // add field for ammo for shootable weapons
         if (primaryWeapon[0].name !== 'Melee') {
             if (primaryWeapon[1].ammoSlots === 1) {
-                embed.addField("🔫 Ammunition", "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "`", true);
-                embed.addField('\u200B', '\u200B', true);
+                embed.addFields({
+                    name: "🔫 Ammunition",
+                    value: "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "`",
+                    inline: true
+                });
+                embed.addFields({
+                    name: '\u200B',
+                    value: '\u200B',
+                    inline: true
+                });
             }
 
             if (primaryWeapon[1].ammoSlots === 2) {
-                embed.addField("🔫 Ammunition", "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "` " + 
-                                             "`" + primaryWeapon[3][1].name + " " + primaryWeapon[3][1].type + "`", true);
-                embed.addField('\u200B', '\u200B', true);
+                embed.addFields({
+                    name: "🔫 Ammunition",
+                    value: "`" + primaryWeapon[3][0].name + " " + primaryWeapon[3][0].type + "` `" + primaryWeapon[3][1].name + " " + primaryWeapon[3][1].type + "`",
+                    inline: true
+                });
+                embed.addFields({
+                    name: '\u200B',
+                    value: '\u200B',
+                    inline: true
+                });
             }
         } else {
-            embed.addField('\u200B', '\u200B', true);
-            embed.addField('\u200B', '\u200B', true);
+            embed.addFields({
+                name: '\u200B',
+                value: '\u200B',
+                inline: true
+            });
+            embed.addFields({
+                name: '\u200B',
+                value: '\u200B',
+                inline: true
+            });
         }
 
         // add secondary weapon as dualies or solo
         if (secondaryWeapon[4]) {
-            embed.addField("🥈 Secondary Weapon", "`2x " + secondaryWeapon[1].name +
-            " (" + secondaryWeapon[2].name + ")`", true);
+            embed.addFields({
+                name: "🥈 Secondary Weapon",
+                value: "`2x " + secondaryWeapon[1].name + " (" + secondaryWeapon[2].name + ")`",
+                inline: true
+            });
         } else {
-            embed.addField("🥈 Secondary Weapon", "`" + secondaryWeapon[1].name +
-            " (" + secondaryWeapon[2].name + ")`", true);
+            embed.addFields({
+                name: "🥈 Secondary Weapon",
+                value: "`" + secondaryWeapon[1].name + " (" + secondaryWeapon[2].name + ")`",
+                inline: true
+            });
         }
 
         // add field for ammo for shootable weapons
         if (secondaryWeapon[0].name !== 'Melee') {
             if (secondaryWeapon[1].ammoSlots === 1) {
-                embed.addField("🔫 Ammunition", "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "`", true);
-                embed.addField('\u200B', '\u200B', true);
+                embed.addFields({
+                    name: "🔫 Ammunition",
+                    value: "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "`",
+                    inline: true
+                });
+                embed.addFields({
+                    name: '\u200B',
+                    value: '\u200B',
+                    inline: true
+                });
             }
 
             if (secondaryWeapon[1].ammoSlots === 2) {
-                embed.addField("🔫 Ammunition", "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "` " + 
-                                             "`" + secondaryWeapon[3][1].name + " " + secondaryWeapon[3][1].type + "`", true);
-                embed.addField('\u200B', '\u200B', true);
+                embed.addFields({
+                    name: "🔫 Ammunition",
+                    value: "`" + secondaryWeapon[3][0].name + " " + secondaryWeapon[3][0].type + "` `" + secondaryWeapon[3][1].name + " " + secondaryWeapon[3][1].type + "`",
+                    inline: true
+                });
+                embed.addFields({
+                    name: '\u200B',
+                    value: '\u200B',
+                    inline: true
+                });
             }
         } else {
-            embed.addField('\u200B', '\u200B', true);
-            embed.addField('\u200B', '\u200B', true);
+            embed.addFields({
+                name: '\u200B',
+                value: '\u200B',
+                inline: true
+            });
+            embed.addFields({
+                name: '\u200B',
+                value: '\u200B',
+                inline: true
+            });
         }
 
-        embed.addField("🛠️ Tools", "`" + tools[0][2].name + "`" +
-        ", `" + tools[1][2].name + "`" +
-        ", `" + tools[2][2].name + "`" +
-        ", `" + tools[3][2].name + "`", false);
+        embed.addFields({
+            name: "🛠️ Tools",
+            value: "`" + tools[0][2].name + "`, `" + tools[1][2].name + "`, `" + tools[2][2].name + "`, `" + tools[3][2].name + "`",
+            inline: false
+        });
         
-        embed.addField("🍔 Consumables", "`" + consumables[0][2].name + "`" +
-        ", `" + consumables[1][2].name + "`" +
-        ", `" + consumables[2][2].name + "`" +
-        ", `" + consumables[3][2].name + "`", false);
+        embed.addFields({
+            name: "🍔 Consumables",
+            value: "`" + consumables[0][2].name + "`, `" + consumables[1][2].name + "`, `" + consumables[2][2].name + "`, `" + consumables[3][2].name + "`",
+            inline: false
+        });
 
         message.channel.send({ embeds: [embed] });
     }

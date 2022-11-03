@@ -268,7 +268,11 @@ function listContests() {
     .setColor("#6666ff")
     .setTimestamp();
 
-    embed.addField("Contests", contestsString, false);
+    embed.addFields({
+        name: "Contests",
+        value: contestsString,
+        inline: false
+    });
 
     MESSAGE.channel.send({ embeds: [embed] });
 }
@@ -307,7 +311,11 @@ function personalStats() {
             }
 
             if (entriesString) {
-                embed.addField("Entries", entriesString, false);
+                embed.addFields({
+                    name: "Entries",
+                    value: entriesString,
+                    inline: false
+                });
             }
 
             // prepare statistics
@@ -320,7 +328,11 @@ function personalStats() {
 
             for (var j = 0; j < contestData.contest.objectives.length; j++) {
                 if (objectiveStatistics != 0) {
-                    embed.addField(contestData.contest.objectives[j].name, objectiveStatistics[j].toString(), false);
+                    embed.addFields({
+                        name: contestData.contest.objectives[j].name,
+                        value: objectiveStatistics[j].toString(),
+                        inline: false
+                    });
                 }
             }
 
@@ -596,9 +608,17 @@ function printContestSheet(contestId) {
 
     // display entry count (mode)
     if (contestData.contest.entryCount > 0) {
-        embed.addField("Tournament Mode 🏅", "Limited to " + contestData.contest.entryCount + " entries per attendee", false);
+        embed.addFields({
+            name: "Tournament Mode 🏅",
+            value: "Limited to " + contestData.contest.entryCount + " entries per attendee",
+            inline: false
+        });
     } else {
-        embed.addField("Event Mode 🎪", "Unlimited entries per attendee", false);
+        embed.addFields({
+            name: "Event Mode 🎪",
+            value: "Unlimited entries per attendee",
+            inline: false
+        });
     }
 
     // display objectives
@@ -607,7 +627,11 @@ function printContestSheet(contestId) {
         objectivesString = objectivesString + '`[' + (i + 1) + ']` ' + contestData.contest.objectives[i].name + ' (' + contestData.contest.objectives[i].value + ' Points)\n';
     }
 
-    embed.addField("Objectives 🎗️ ", objectivesString, false);
+    embed.addFields({
+        name: "Objectives 🎗️ ",
+        value: objectivesString,
+        inline: false
+    });
 
     // displays attendees
     var attendeePoints, attendeePointsRounded;
@@ -670,7 +694,11 @@ function printContestSheet(contestId) {
     }
 
     if (podiumString !== "") {
-        embed.addField("Podium 🔥", podiumString, false);
+        embed.addFields({
+            name: "Podium 🔥",
+            value: podiumString,
+            inline: false
+        });
     }
 
     var attendeesString = "";
@@ -679,7 +707,11 @@ function printContestSheet(contestId) {
     }
 
     if (attendeesString !== "") {
-        embed.addField("Attendees 🤠", attendeesString, false);
+        embed.addFields({
+            name: "Attendees 🤠",
+            value: attendeesString,
+            inline: false
+        });
     }
 
     MESSAGE.channel.send({ embeds: [embed] });

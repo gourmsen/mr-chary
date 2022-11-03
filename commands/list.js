@@ -64,7 +64,11 @@ module.exports = {
                         variantString = variantString + "• " + variant.name + " `" + variant.price + "$`" + "\n";
                     }
                     
-                    embed.addField(item.name, variantString, true);
+                    embed.addFields({
+                        name: item.name,
+                        value: variantString,
+                        inline: true
+                    });
                 }
                 
                 message.channel.send({ embeds: [embed] });
