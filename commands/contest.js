@@ -20,6 +20,7 @@ const ERR_MAXIMUM_ENTRIES = 10;
 const ERR_NOT_NUMERIC = 11;
 const ERR_NOT_ATTENDING = 12;
 const ERR_NOT_OPEN = 13;
+const ERR_ROUND_COUNT = 14;
 
 module.exports = {
     name: 'contest',
@@ -41,7 +42,7 @@ module.exports = {
                 break;
             case "a":
             case "add":
-                addEntry();
+                entryContest();
                 break;
 
             // information
@@ -61,11 +62,15 @@ module.exports = {
             // states
             case "s":
             case "start":
-                stateContest('Started');
+                stateContest(STAT_STARTED);
+                break;
+            case "r":
+            case "round":
+                roundContest();
                 break;
             case "e":
             case "end":
-                stateContest('Closed');
+                stateContest(STAT_CLOSED);
                 break;
             default:
                 break;
@@ -77,7 +82,7 @@ function createContest() {
     const fs = require('fs');
     const crypto = require('crypto');
 
-    var contestId, filePath, contestState, contestAuthorId, contestAuthorName, contestEntryCount, contestObjectives;
+    var contestId, filePath, contestCreationDate, contestState, contestAuthorId, contestAuthorName, contestEntryCount, contestCurrentRound, contestMaxRoundCount, contestObjectives;
 
     // generate unique contest id
     contestId = crypto.randomBytes(3).toString("hex");
@@ -92,6 +97,8 @@ function createContest() {
     }
 
     // basic fields
+    contestCreationDate = new Date().toJSON();
+
     contestState = STAT_OPEN;
     contestAuthorId = MESSAGE.author.id;
     contestAuthorName = MESSAGE.author.username;
@@ -102,26 +109,41 @@ function createContest() {
         return ERR_ENTRY_COUNT;
     }
 
-    // check for objectives
-    if (ARGS.length < 3) {
-        MESSAGE.channel.send("Enter at least one objective...");
-        return ERR_OBJECTIVE_MINIMUM;
-    }
-
     // entry count
-    contestEntryCount = ARGS[1];
+    contestEntryCount = parseInt(ARGS[1]);
     if (isNaN(contestEntryCount)) {
         MESSAGE.channel.send("Enter a numeric value for the entry count...");
         return ERR_NOT_NUMERIC;
+    }
+
+    contestCurrentRound = 1;
+
+    // check for maximum round count
+    if (ARGS.length < 3) {
+        MESSAGE.channel.send("Enter the maximum round count (0 for unlimited)...");
+        return ERR_ROUND_COUNT;
+    }
+
+    // maximum round count
+    contestMaxRoundCount = parseInt(ARGS[2]);
+    if (isNaN(contestMaxRoundCount)) {
+        MESSAGE.channel.send("Enter a numeric value for the maximium round count...");
+        return ERR_NOT_NUMERIC;
+    }
+
+    // check for objectives
+    if (ARGS.length < 4) {
+        MESSAGE.channel.send("Enter at least one objective...");
+        return ERR_OBJECTIVE_MINIMUM;
     }
 
     // contest objectives
     contestObjectives = [];
 
     var objectiveName, objectiveValue;
-    for (var i = 2; i < ARGS.length; i++) {
+    for (var i = 3; i < ARGS.length; i++) {
         objectiveName = ARGS[i].substr(0, ARGS[i].indexOf('='));
-        objectiveValue = ARGS[i].split('=')[1];
+        objectiveValue = parseInt(ARGS[i].split('=')[1]);
         if (isNaN(objectiveValue)) {
             MESSAGE.channel.send("Enter a numeric value for objective `" + objectiveName + "`..." );
             return ERR_NOT_NUMERIC;
@@ -139,10 +161,13 @@ function createContest() {
     var contestData = {
         "contest": {
             "id": contestId,
+            "creationDate": contestCreationDate,
             "state": contestState,
             "authorId": contestAuthorId,
             "authorName": contestAuthorName,
             "entryCount": contestEntryCount,
+            "currentRound": contestCurrentRound,
+            "maxRoundCount": contestMaxRoundCount,
             "rated": false,
             "objectives": contestObjectives
         },
@@ -206,6 +231,11 @@ function infoContest() {
     if (contestData === ERR_CONTEST_NOT_FOUND) return;
 
     printContestSheet(contestId);
+
+    // print all round sheets
+    for (var i = 0; i < contestData.contest.currentRound; i++) {
+        printRoundSheet(contestId, i + 1);
+    }
 }
 
 function listContests() {
@@ -258,7 +288,7 @@ function listContests() {
                 break;
         }
 
-        contestsString = contestsString + contestId + ' (Author: ' + contestData.contest.authorName + ')`\n';
+        contestsString = contestsString + contestId + " (Author: " + contestData.contest.authorName + ") - (Created: " + contestData.contest.creationDate.substr(0, 10) + ")`\n";
     }
 
     // show embed
@@ -393,7 +423,38 @@ function stateContest(state) {
     }
 }
 
-function addEntry() {
+
+function roundContest() {
+    var contestId, contestData;
+
+    contestId = ARGS[1];
+    contestData = getContestData(contestId);
+    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+
+    // author check
+    if (contestData.contest.authorId !== MESSAGE.author.id) {
+        MESSAGE.channel.send("Only the contest author can change the current round...");
+        return ERR_ONLY_AUTHOR;
+    }
+
+    contestData.contest.currentRound++;
+
+    // check if last round
+    if (contestData.contest.currentRound > contestData.contest.maxRoundCount) {
+        stateContest(STAT_CLOSED);
+        return;
+    }
+
+    // write new round to contest file
+    writeContestData(contestId, contestData);
+
+    MESSAGE.channel.send("Round " + contestData.contest.currentRound + " has started!");
+    console.info("Contest '" + contestId + "' has reached round " + contestData.contest.currentRound + "!");
+    printContestSheet(contestId);
+    printRoundSheet(contestId, contestData.contest.currentRound - 1);
+}
+
+function entryContest() {
     const crypto = require('crypto');
 
     var contestId, contestData;
@@ -455,7 +516,7 @@ function addEntry() {
 
                 // check, whether objective is in arguments and fill value
                 for (var k = 2; k < ARGS.length; k++) {
-                    objectiveId = ARGS[k].substr(0, ARGS[k].indexOf('='));
+                    objectiveId = parseInt(ARGS[k].substr(0, ARGS[k].indexOf('=')));
 
                     // check numeric
                     if (isNaN(objectiveId)) {
@@ -464,7 +525,7 @@ function addEntry() {
                     }
 
                     if (objectiveId - 1 === j) {
-                        objectiveValue = ARGS[k].split('=')[1];
+                        objectiveValue = parseInt(ARGS[k].split('=')[1]);
 
                         // check numeric
                         if (isNaN(objectiveValue)) {
@@ -474,7 +535,7 @@ function addEntry() {
 
                         break;
                     } else {
-                        objectiveValue = "0";
+                        objectiveValue = 0;
                     }
                 }
 
@@ -488,6 +549,7 @@ function addEntry() {
 
             entryData = {
                 "id": entryId,
+                "round": contestData.contest.currentRound,
                 "values": entryValues
             }
             
@@ -573,7 +635,7 @@ function printContestSheet(contestId) {
     // display objectives example
     var objectivesStringExample = "";
     for (var i = 0; i < contestData.contest.objectives.length; i++) {
-        objectivesStringExample = objectivesStringExample + ' ' + (i + 1) + '=' + ((Math.floor(Math.random() * 5)) + 1);
+        objectivesStringExample = objectivesStringExample + ' ' + (i + 1) + '=' + "0";
     }
 
     // prepare rated symbol
@@ -586,12 +648,12 @@ function printContestSheet(contestId) {
     switch(contestData.contest.state) {
         case STAT_OPEN:
             embed.setTitle("Contest `[" + contestId + "]` • `[OPEN]`" + ratedString);
-            embed.setDescription("Join with `!cry contest join " + contestId + '`');
+            embed.setDescription("`!cry contest join " + contestId + '`');
             embed.setColor("#00ccff");
             break;
         case STAT_STARTED:
             embed.setTitle("Contest `[" + contestId + "]` • `[STARTED]`" + ratedString);
-            embed.setDescription("Add entries with the scored amount for each objective like `!cry contest add " + contestId + objectivesStringExample + '`');
+            embed.setDescription("`!cry contest add " + contestId + objectivesStringExample + '`');
             embed.setColor("#99ff99");
             break;
         case STAT_CLOSED:
@@ -639,7 +701,7 @@ function printContestSheet(contestId) {
     for (var i = 0; i < contestData.attendees.length; i++) {
 
         // calculate points
-        attendeePoints = calculatePoints(contestData.contest.id, contestData.attendees[i].id);
+        attendeePoints = calculatePoints(contestData.contest.id, contestData.attendees[i].id, 0);
         attendeePointsRounded = Math.round(attendeePoints * 100) / 100;
 
         var attendeeData = {
@@ -717,7 +779,94 @@ function printContestSheet(contestId) {
     MESSAGE.channel.send({ embeds: [embed] });
 }
 
-function calculatePoints(contestId, attendeeId) {
+function printRoundSheet(contestId, contestRound) {
+    var contestData;
+
+    contestData = getContestData(contestId);
+    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+
+    // create embed
+    const embed = new MessageEmbed()
+    .setDescription("")
+    .setTimestamp();
+
+    // display contest round
+    embed.setTitle("Round " + contestRound);
+    embed.setDescription("");
+    embed.setColor("#cc6699");
+
+    // displays attendees
+    var attendeePoints, attendeePointsRounded;
+    var attendees = [];
+    for (var i = 0; i < contestData.attendees.length; i++) {
+
+        // calculate points
+        attendeePoints = calculatePoints(contestData.contest.id, contestData.attendees[i].id, contestRound);
+        attendeePointsRounded = Math.round(attendeePoints * 100) / 100;
+
+        var attendeeData = {
+            "name": contestData.attendees[i].name,
+            "points": attendeePointsRounded
+        }
+        attendees.push(attendeeData);
+    }
+
+    var sortedAttendees = sortAttendees(attendees);
+
+    var attendeesString = "";
+    for (var i = 0; i < sortedAttendees.length; i++) {
+        attendeesString = attendeesString + '• ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
+    }
+
+    if (attendeesString !== "") {
+        embed.addFields({
+            name: "Results 🎬",
+            value: attendeesString,
+            inline: false
+        });
+    }
+
+    // prepare player statistics
+    var playerStatisticsString = "";
+    var objectiveStatistics;
+    for (var i = 0; i < contestData.attendees.length; i++) {
+
+        playerStatisticsString = playerStatisticsString + "• " + contestData.attendees[i].name + "\n";
+        objectiveStatistics = new Array(contestData.contest.objectives.length).fill(Number(0));
+
+        // go through all objectives
+        for (var j = 0; j < contestData.contest.objectives.length; j++) {
+
+            // go through all entries
+            for (var k = 0; k < contestData.attendees[i].entries.length; k++) {
+
+                // go through all values and add them to the objectives statistic
+                for (var l = 0; l < contestData.attendees[i].entries[k].values.length; l++) {
+
+                    if (contestData.attendees[i].entries[k].values[l].objective === contestData.contest.objectives[j].name) {
+                        if (contestData.attendees[i].entries[k].round === contestRound) {
+                            objectiveStatistics[j] = objectiveStatistics[j] + contestData.attendees[i].entries[k].values[l].value;
+                        }
+                    }
+                }
+            }
+
+            // display objective values
+            playerStatisticsString = playerStatisticsString + "`" + objectiveStatistics[j] + "x " + contestData.contest.objectives[j].name + "` ";
+        }
+        playerStatisticsString = playerStatisticsString + "\n";
+    }
+
+    embed.addFields({
+        name: "Statistics 📈",
+        value: playerStatisticsString,
+        inline: false
+    });
+
+    MESSAGE.channel.send({ embeds: [embed] });
+}
+
+function calculatePoints(contestId, attendeeId, contestRound) {
     var contestData = getContestData(contestId);
     if (contestData === ERR_CONTEST_NOT_FOUND) return;
 
@@ -728,6 +877,11 @@ function calculatePoints(contestId, attendeeId) {
 
             // calculate points for every entry
             for (var j = 0; j < contestData.attendees[i].entries.length; j++) {
+
+                // check for round
+                if (contestRound > 0 && contestData.attendees[i].entries[j].round !== contestRound) {
+                    continue;
+                }
 
                 // multiply points by value of objective
                 for (var k = 0; k < contestData.attendees[i].entries[j].values.length; k++) {

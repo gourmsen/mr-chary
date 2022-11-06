@@ -34,7 +34,7 @@ function defaultHelp() {
         {name: "`!cry help`", value: "Prints this help.", inline: false},
         {name: "`!cry list (-g|--group=<name>)`", value: "Lists all available items.", inline: false},
         {name: "`!cry random (-fs|--fill-slots) (-fm|--force-melee) (-fk|--force-kit) (-bl|--bloodline-level=<value>)`", value: "Generates a random loadout.", inline: false},
-        {name: "`!cry contest (create|info|join|start|end|add|list)`", value: "Generates a random loadout.", inline: false}
+        {name: "`!cry contest (create|info|personal|join|start|round|end|add|list)`", value: "Manages the contest.", inline: false}
     );
 
     MESSAGE.channel.send({ embeds: [embed] });
@@ -47,14 +47,15 @@ function contestHelp() {
     .setColor("#fee75c")
     .setTimestamp()
     .addFields(
-        {name: "`!cry contest create [entries] [objective=value>:n]`", value: "Creates a new contest, e.g. `!cry contest create 3 Token=4 Kill=2 Assist=1 Revive=1` for a contest with 3 entries per attendee and 4 objectives. Entries are unlimited, when count is 0.", inline: false},
-        {name: "`!cry contest info [contest_id]`",                     value: "Shows information about the contest.", inline: false},
-        {name: "`!cry contest personal [contest_id]`",                 value: "Shows personal statistics about the contest.", inline: false},
-        {name: "`!cry contest join [contest_id]`",                     value: "Join the contest.", inline: false},
-        {name: "`!cry contest start [contest_id]`",                    value: "Start the contest (only when author of the contest).", inline: false},
-        {name: "`!cry contest end [contest_id]`",                      value: "Close the contest (only when author of the contest).", inline: false},
-        {name: "`!cry contest add [contest_id] <objective=value>:n`",  value: "Log an entry for the contest.", inline: false},
-        {name: "`!cry contest list`",                                  value: "List all contests.", inline: false}
+        {name: "`!cry contest create [entries] [max rounds] [objective=value>:n]`", value: "Creates a new contest, e.g. `!cry contest create 3 Token=4 Kill=2 Assist=1 Revive=1` for a contest with 3 entries per attendee and 4 objectives. Entries are unlimited, when count is 0.", inline: false},
+        {name: "`!cry contest info [contest_id]`",                                  value: "Shows information about the contest.", inline: false},
+        {name: "`!cry contest personal [contest_id]`",                              value: "Shows personal statistics about the contest.", inline: false},
+        {name: "`!cry contest join [contest_id]`",                                  value: "Join the contest.", inline: false},
+        {name: "`!cry contest start [contest_id]`",                                 value: "Start the contest (only when author of the contest).", inline: false},
+        {name: "`!cry contest round [contest_id]`",                                 value: "Start the next round (only when author of the contest).", inline: false},
+        {name: "`!cry contest end [contest_id]`",                                   value: "Close the contest (only when author of the contest).", inline: false},
+        {name: "`!cry contest add [contest_id] <objective=value>:n`",               value: "Log an entry for the contest.", inline: false},
+        {name: "`!cry contest list`",                                               value: "List all contests.", inline: false}
     );
 
     MESSAGE.channel.send({ embeds: [embedHelp] });
