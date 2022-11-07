@@ -417,6 +417,11 @@ function stateContest(state) {
             MESSAGE.channel.send("Contest has been closed!");
             console.info("Contest '" + contestId + "' has been closed!")
             printContestSheet(contestId);
+            
+            // print all round sheets
+            for (var i = 0; i < contestData.contest.currentRound; i++) {
+                printRoundSheet(contestId, i + 1);
+            }
             break;
         default:
             break;
@@ -440,7 +445,7 @@ function roundContest() {
     contestData.contest.currentRound++;
 
     // check if last round
-    if (contestData.contest.currentRound > contestData.contest.maxRoundCount) {
+    if (contestData.contest.maxRoundCount > 0 && contestData.contest.currentRound > contestData.contest.maxRoundCount) {
         stateContest(STAT_CLOSED);
         return;
     }
@@ -765,7 +770,7 @@ function printContestSheet(contestId) {
 
     var attendeesString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
-        attendeesString = attendeesString + '• ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
+        attendeesString = attendeesString + '> ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
     }
 
     if (attendeesString !== "") {
@@ -815,7 +820,7 @@ function printRoundSheet(contestId, contestRound) {
 
     var attendeesString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
-        attendeesString = attendeesString + '• ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
+        attendeesString = attendeesString + '> ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
     }
 
     if (attendeesString !== "") {
@@ -831,7 +836,7 @@ function printRoundSheet(contestId, contestRound) {
     var objectiveStatistics;
     for (var i = 0; i < contestData.attendees.length; i++) {
 
-        playerStatisticsString = playerStatisticsString + "• " + contestData.attendees[i].name + "\n";
+        playerStatisticsString = playerStatisticsString + "> " + contestData.attendees[i].name + "\n";
         objectiveStatistics = new Array(contestData.contest.objectives.length).fill(Number(0));
 
         // go through all objectives
