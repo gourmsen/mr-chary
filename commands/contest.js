@@ -230,12 +230,12 @@ function infoContest() {
     contestData = getContestData(contestId);
     if (contestData === ERR_CONTEST_NOT_FOUND) return;
 
-    printContestSheet(contestId);
-
     // print all round sheets
     for (var i = 0; i < contestData.contest.currentRound; i++) {
         printRoundSheet(contestId, i + 1);
     }
+
+    printContestSheet(contestId);
 }
 
 function listContests() {
@@ -416,12 +416,14 @@ function stateContest(state) {
         case 'Closed':
             MESSAGE.channel.send("Contest has been closed!");
             console.info("Contest '" + contestId + "' has been closed!")
-            printContestSheet(contestId);
-            
+
             // print all round sheets
             for (var i = 0; i < contestData.contest.currentRound; i++) {
                 printRoundSheet(contestId, i + 1);
             }
+
+            printContestSheet(contestId);
+            
             break;
         default:
             break;
@@ -455,8 +457,8 @@ function roundContest() {
 
     MESSAGE.channel.send("Round " + contestData.contest.currentRound + " has started!");
     console.info("Contest '" + contestId + "' has reached round " + contestData.contest.currentRound + "!");
-    printContestSheet(contestId);
     printRoundSheet(contestId, contestData.contest.currentRound - 1);
+    printContestSheet(contestId);
 }
 
 function entryContest() {
@@ -770,7 +772,7 @@ function printContestSheet(contestId) {
 
     var attendeesString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
-        attendeesString = attendeesString + '> ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
+        attendeesString = attendeesString + '• ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
     }
 
     if (attendeesString !== "") {
@@ -820,7 +822,7 @@ function printRoundSheet(contestId, contestRound) {
 
     var attendeesString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
-        attendeesString = attendeesString + '> ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
+        attendeesString = attendeesString + '• ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
     }
 
     if (attendeesString !== "") {
@@ -836,7 +838,7 @@ function printRoundSheet(contestId, contestRound) {
     var objectiveStatistics;
     for (var i = 0; i < contestData.attendees.length; i++) {
 
-        playerStatisticsString = playerStatisticsString + "> " + contestData.attendees[i].name + "\n";
+        playerStatisticsString = playerStatisticsString + "• " + contestData.attendees[i].name + "\n";
         objectiveStatistics = new Array(contestData.contest.objectives.length).fill(Number(0));
 
         // go through all objectives
