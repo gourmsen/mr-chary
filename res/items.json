@@ -1,5 +1,5 @@
 {
-    "version": "1.8.1",
+    "version": "1.11",
     "groups": [
         {
             "name": "Rifles",
@@ -48,17 +48,17 @@
                         },
                         {
                             "name": "High Velocity",
-                            "price": 75,
+                            "price": 50,
                             "type": "Compact"
                         },
                         {
                             "name": "Incendiary",
-                            "price": 25,
+                            "price": 10,
                             "type": "Compact"
                         },
                         {
                             "name": "Full Metal Jacket",
-                            "price": 35,
+                            "price": 50,
                             "type": "Compact"
                         }
                     ]
@@ -102,20 +102,54 @@
                         },
                         {
                             "name": "Dumdum",
-                            "price": 50,
+                            "price": 25,
                             "type": "Medium"
                         },
                         {
                             "name": "Explosive",
-                            "price": 90,
+                            "price": 45,
                             "type": "Medium"
+                        },
+                        {
+                            "name": "Poison",
+                            "price": 25,
+                            "type": "Medium"
+                        }
+                    ]
+                },
+                {
+                    "name": "Springfield 1892 Krag",
+                    "ammoSlots": 1,
+                    "bloodlineLevel": 0,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 376
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 20,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 60,
+                            "type": "Long"
                         }
                     ]
                 },
                 {
                     "name": "Vetterli 71 Karabiner",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 6,
+                    "bloodlineLevel": 14,
                     "variants": [
                         {
                             "name": "Normal",
@@ -151,17 +185,17 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 30,
+                            "price": 10,
                             "type": "Medium"
                         },
                         {
                             "name": "Full Metal Jacket",
-                            "price": 45,
+                            "price": 50,
                             "type": "Medium"
                         },
                         {
                             "name": "High Velocity",
-                            "price": 90,
+                            "price": 50,
                             "type": "Medium"
                         }
                     ]
@@ -169,7 +203,7 @@
                 {
                     "name": "Martini-Henry IC1",
                     "ammoSlots": 2,
-                    "bloodlineLevel": 16,
+                    "bloodlineLevel": 9,
                     "variants": [
                         {
                             "name": "Normal",
@@ -200,7 +234,41 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 35,
+                            "price": 10,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
+                            "price": 30,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Explosive",
+                            "price": 50,
+                            "type": "Long"
+                        }
+                    ]
+                },
+                {
+                    "name": "Martini-Henry IC1 Ironside",
+                    "ammoSlots": 1,
+                    "bloodlineLevel": 0,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 184
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Long"
+                        },
+                        {
+                            "name": "Incendiary",
+                            "price": 20,
                             "type": "Long"
                         },
                         {
@@ -210,7 +278,7 @@
                         },
                         {
                             "name": "Explosive",
-                            "price": 120,
+                            "price": 100,
                             "type": "Long"
                         }
                     ]
@@ -218,7 +286,7 @@
                 {
                     "name": "Winfield 1873",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 20,
+                    "bloodlineLevel": 27,
                     "variants": [
                         {
                             "name": "Normal",
@@ -254,17 +322,17 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 25,
+                            "price": 10,
                             "type": "Compact"
                         },
                         {
                             "name": "High Velocity",
-                            "price": 75,
+                            "price": 50,
                             "type": "Compact"
                         },
                         {
                             "name": "Full Metal Jacket",
-                            "price": 35,
+                            "price": 50,
                             "type": "Compact"
                         }
                     ]
@@ -272,12 +340,17 @@
                 {
                     "name": "Sparks LRR",
                     "ammoSlots": 2,
-                    "bloodlineLevel": 26,
+                    "bloodlineLevel": 32,
                     "variants": [
                         {
                             "name": "Normal",
                             "slots": 3,
                             "price": 130
+                        },
+                        {
+                            "name": "Pistol",
+                            "slots": 3,
+                            "price": 155
                         },
                         {
                             "name": "Silencer",
@@ -298,17 +371,17 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 35,
+                            "price": 10,
                             "type": "Long"
                         },
                         {
                             "name": "Poison",
-                            "price": 60,
+                            "price": 30,
                             "type": "Long"
                         },
                         {
                             "name": "Full Metal Jacket",
-                            "price": 60,
+                            "price": 30,
                             "type": "Long"
                         }
                     ]
@@ -336,7 +409,7 @@
                         {
                             "name": "Marksman",
                             "slots": 3,
-                            "price": 437
+                            "price": 607
                         }
                     ],
                     "ammoTypes": [
@@ -347,12 +420,12 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 35,
+                            "price": 20,
                             "type": "Long"
                         },
                         {
                             "name": "Spitzer",
-                            "price": 220,
+                            "price": 150,
                             "type": "Long"
                         }
                     ]
@@ -360,7 +433,7 @@
                 {
                     "name": "Berthier Mle 1892",
                     "ammoSlots": 2,
-                    "bloodlineLevel": 62,
+                    "bloodlineLevel": 48,
                     "variants": [
                         {
                             "name": "Normal",
@@ -386,12 +459,12 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 35,
+                            "price": 10,
                             "type": "Long"
                         },
                         {
                             "name": "Spitzer",
-                            "price": 220,
+                            "price": 75,
                             "type": "Long"
                         }
                     ]
@@ -399,7 +472,7 @@
                 {
                     "name": "Winfield M1876 Centennial",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 58,
+                    "bloodlineLevel": 24,
                     "variants": [
                         {
                             "name": "Normal",
@@ -410,6 +483,11 @@
                             "name": "Sniper",
                             "slots": 3,
                             "price": 229
+                        },
+                        {
+                            "name": "Trauma",
+                            "slots": 3,
+                            "price": 200
                         }
                     ],
                     "ammoTypes": [
@@ -420,12 +498,12 @@
                         },
                         {
                             "name": "Poison",
-                            "price": 40,
+                            "price": 50,
                             "type": "Medium"
                         },
                         {
                             "name": "Full Metal Jacket",
-                            "price": 45,
+                            "price": 50,
                             "type": "Medium"
                         }
                     ]
@@ -433,7 +511,7 @@
                 {
                     "name": "Mosin-Nagant M1891",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 72,
+                    "bloodlineLevel": 75,
                     "variants": [
                         {
                             "name": "Normal",
@@ -458,7 +536,7 @@
                         {
                             "name": "Sniper",
                             "slots": 3,
-                            "price": 550
+                            "price": 730
                         },
                         {
                             "name": "Obrez Drum",
@@ -479,12 +557,12 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 35,
+                            "price": 20,
                             "type": "Long"
                         },
                         {
                             "name": "Spitzer",
-                            "price": 220,
+                            "price": 150,
                             "type": "Long"
                         }
                     ]
@@ -492,7 +570,7 @@
                 {
                     "name": "Nitro Express Rifle",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 88,
+                    "bloodlineLevel": 90,
                     "variants": [
                         {
                             "name": "Normal",
@@ -508,7 +586,7 @@
                         },
                         {
                             "name": "Shredder",
-                            "price": 150,
+                            "price": 225,
                             "type": "Special"
                         },
                         {
@@ -541,7 +619,7 @@
                         {
                             "name": "Silencer",
                             "slots": 1,
-                            "price": 53
+                            "price": 93
                         },
                         {
                             "name": "Deadeye",
@@ -557,12 +635,12 @@
                         },
                         {
                             "name": "Poison",
-                            "price": 35,
+                            "price": 50,
                             "type": "Compact"
                         },
                         {
                             "name": "High Velocity",
-                            "price": 75,
+                            "price": 50,
                             "type": "Compact"
                         }
                     ]
@@ -606,12 +684,12 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 30,
+                            "price": 10,
                             "type": "Medium"
                         },
                         {
                             "name": "Full Metal Jacket",
-                            "price": 45,
+                            "price": 50,
                             "type": "Medium"
                         }
                     ]
@@ -635,12 +713,12 @@
                         },
                         {
                             "name": "Dumdum",
-                            "price": 40,
+                            "price": 50,
                             "type": "Compact"
                         },
                         {
                             "name": "Full Metal Jacket",
-                            "price": 35,
+                            "price": 50,
                             "type": "Compact"
                         }
                     ]
@@ -648,17 +726,17 @@
                 {
                     "name": "Caldwell Pax",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 18,
+                    "bloodlineLevel": 30,
                     "variants": [
                         {
                             "name": "Normal",
                             "slots": 1,
-                            "price": 100
+                            "price": 80
                         },
                         {
                             "name": "Claw",
                             "slots": 1,
-                            "price": 125
+                            "price": 105
                         }
                     ],
                     "ammoTypes": [
@@ -669,11 +747,21 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 30,
+                            "price": 10,
                             "type": "Medium"
                         },
                         {
                             "name": "Dumdum",
+                            "price": 50,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Poison",
+                            "price": 50,
+                            "type": "Medium"
+                        },
+                        {
+                            "name": "Full Metal Jacket",
                             "price": 50,
                             "type": "Medium"
                         }
@@ -682,17 +770,17 @@
                 {
                     "name": "Caldwell Conversion Pistol",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 22,
+                    "bloodlineLevel": 18,
                     "variants": [
                         {
                             "name": "Normal",
                             "slots": 1,
-                            "price": 26
+                            "price": 55
                         },
                         {
                             "name": "Chain",
                             "slots": 1,
-                            "price": 50
+                            "price": 84
                         }
                     ],
                     "ammoTypes": [
@@ -703,12 +791,12 @@
                         },
                         {
                             "name": "Dumdum",
-                            "price": 40,
+                            "price": 50,
                             "type": "Compact"
                         },
                         {
                             "name": "Full Metal Jacket",
-                            "price": 35,
+                            "price": 50,
                             "type": "Compact"
                         }
                     ]
@@ -716,12 +804,12 @@
                 {
                     "name": "Caldwell Conversion Uppercut",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 22,
+                    "bloodlineLevel": 18,
                     "variants": [
                         {
                             "name": "Normal",
                             "slots": 1,
-                            "price": 275
+                            "price": 414
                         }
                     ],
                     "ammoTypes": [
@@ -732,12 +820,12 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 35,
+                            "price": 20,
                             "type": "Long"
                         },
                         {
                             "name": "Explosive",
-                            "price": 120,
+                            "price": 100,
                             "type": "Long"
                         }
                     ]
@@ -745,22 +833,22 @@
                 {
                     "name": "Bornheim No. 3",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 30,
+                    "bloodlineLevel": 35,
                     "variants": [
                         {
                             "name": "Normal",
                             "slots": 1,
-                            "price": 201
+                            "price": 146
                         },
                         {
                             "name": "Match",
                             "slots": 2,
-                            "price": 224
+                            "price": 180
                         },
                         {
                             "name": "Extended",
                             "slots": 1,
-                            "price": 306
+                            "price": 203
                         }
                     ],
                     "ammoTypes": [
@@ -771,12 +859,12 @@
                         },
                         {
                             "name": "Incendiary",
-                            "price": 25,
+                            "price": 10,
                             "type": "Compact"
                         },
                         {
                             "name": "High Velocity",
-                            "price": 75,
+                            "price": 50,
                             "type": "Compact"
                         }
                     ]
@@ -784,7 +872,7 @@
                 {
                     "name": "Nagant M1895 Officer",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 36,
+                    "bloodlineLevel": 56,
                     "variants": [
                         {
                             "name": "Normal",
@@ -815,12 +903,12 @@
                         },
                         {
                             "name": "Poison",
-                            "price": 35,
+                            "price": 50,
                             "type": "Compact"
                         },
                         {
                             "name": "High Velocity",
-                            "price": 75,
+                            "price": 50,
                             "type": "Compact"
                         }
                     ]
@@ -834,6 +922,11 @@
                             "name": "Normal",
                             "slots": 1,
                             "price": 95
+                        },
+                        {
+                            "name": "Carbine",
+                            "slots": 3,
+                            "price": 130
                         }
                     ],
                     "ammoTypes": [
@@ -849,27 +942,27 @@
                         },
                         {
                             "name": "Starshell",
-                            "price": 10,
+                            "price": 5,
                             "type": "Shotgun"
                         },
                         {
                             "name": "Incendiary",
-                            "price": 25,
+                            "price": 10,
                             "type": "Compact"
                         },
                         {
                             "name": "Dragon Breath",
-                            "price": 50,
+                            "price": 10,
                             "type": "Shotgun"
                         },
                         {
                             "name": "Full Metal Jacket",
-                            "price": 35,
+                            "price": 50,
                             "type": "Compact"
                         },
                         {
                             "name": "Slug",
-                            "price": 200,
+                            "price": 65,
                             "type": "Shotgun"
                         }
                     ]
@@ -877,7 +970,7 @@
                 {
                     "name": "Dolch 96",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 68,
+                    "bloodlineLevel": 71,
                     "variants": [
                         {
                             "name": "Normal",
@@ -911,22 +1004,61 @@
                         {
                             "name": "Normal",
                             "slots": 3,
-                            "price": 34
+                            "price": 66
                         },
                         {
                             "name": "Handcannon",
                             "slots": 2,
-                            "price": 26
+                            "price": 46
                         },
                         {
                             "name": "Talon",
                             "slots": 3,
-                            "price": 59
+                            "price": 84
                         },
                         {
                             "name": "Hatchet",
                             "slots": 2,
-                            "price": 62
+                            "price": 82
+                        }
+                    ],
+                    "ammoTypes": [
+                        {
+                            "name": "Normal",
+                            "price": 0,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Starshell",
+                            "price": 5,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Dragon Breath",
+                            "price": 10,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Penny Shot",
+                            "price": 5,
+                            "type": "Shotgun"
+                        },
+                        {
+                            "name": "Slug",
+                            "price": 65,
+                            "type": "Shotgun"
+                        }
+                    ]
+                },
+                {
+                    "name": "Romero 77 Alamo",
+                    "ammoSlots": 1,
+                    "bloodlineLevel": 1,
+                    "variants": [
+                        {
+                            "name": "Normal",
+                            "slots": 3,
+                            "price": 98
                         }
                     ],
                     "ammoTypes": [
@@ -942,7 +1074,7 @@
                         },
                         {
                             "name": "Dragon Breath",
-                            "price": 50,
+                            "price": 20,
                             "type": "Shotgun"
                         },
                         {
@@ -952,7 +1084,7 @@
                         },
                         {
                             "name": "Slug",
-                            "price": 200,
+                            "price": 130,
                             "type": "Shotgun"
                         }
                     ]
@@ -960,17 +1092,17 @@
                 {
                     "name": "Caldwell Rival 78",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 10,
+                    "bloodlineLevel": 16,
                     "variants": [
                         {
                             "name": "Normal",
                             "slots": 3,
-                            "price": 100
+                            "price": 150
                         },
                         {
                             "name": "Handcannon",
                             "slots": 2,
-                            "price": 85
+                            "price": 125
                         }
                     ],
                     "ammoTypes": [
@@ -981,7 +1113,7 @@
                         },
                         {
                             "name": "Flechette",
-                            "price": 45,
+                            "price": 40,
                             "type": "Shotgun"
                         },
                         {
@@ -991,7 +1123,7 @@
                         },
                         {
                             "name": "Slug",
-                            "price": 200,
+                            "price": 130,
                             "type": "Shotgun"
                         }
                     ]
@@ -999,7 +1131,7 @@
                 {
                     "name": "Specter 1882",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 24,
+                    "bloodlineLevel": 38,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1025,12 +1157,12 @@
                         },
                         {
                             "name": "Flechette",
-                            "price": 45,
+                            "price": 40,
                             "type": "Shotgun"
                         },
                         {
                             "name": "Dragon Breath",
-                            "price": 50,
+                            "price": 20,
                             "type": "Shotgun"
                         },
                         {
@@ -1040,7 +1172,7 @@
                         },
                         {
                             "name": "Slug",
-                            "price": 200,
+                            "price": 130,
                             "type": "Shotgun"
                         }
                     ]
@@ -1048,12 +1180,12 @@
                 {
                     "name": "Winfield 1893 Slate",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 48,
+                    "bloodlineLevel": 65,
                     "variants": [
                         {
                             "name": "Normal",
                             "slots": 3,
-                            "price": 250
+                            "price": 333
                         }
                     ],
                     "ammoTypes": [
@@ -1069,7 +1201,7 @@
                         },
                         {
                             "name": "Slug",
-                            "price": 200,
+                            "price": 130,
                             "type": "Shotgun"
                         }
                     ]
@@ -1077,17 +1209,17 @@
                 {
                     "name": "Winfield 1887 Terminus",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 64,
+                    "bloodlineLevel": 4,
                     "variants": [
                         {
                             "name": "Normal",
                             "slots": 3,
-                            "price": 309
+                            "price": 238
                         },
                         {
                             "name": "Handcannon",
                             "slots": 2,
-                            "price": 289
+                            "price": 218
                         }
                     ],
                     "ammoTypes": [
@@ -1098,12 +1230,12 @@
                         },
                         {
                             "name": "Flechette",
-                            "price": 45,
+                            "price": 40,
                             "type": "Shotgun"
                         },
                         {
                             "name": "Dragon Breath",
-                            "price": 50,
+                            "price": 20,
                             "type": "Shotgun"
                         },
                         {
@@ -1113,7 +1245,7 @@
                         },
                         {
                             "name": "Slug",
-                            "price": 200,
+                            "price": 130,
                             "type": "Shotgun"
                         }
                     ]
@@ -1142,7 +1274,7 @@
                         },
                         {
                             "name": "Slug",
-                            "price": 200,
+                            "price": 130,
                             "type": "Shotgun"
                         }
                     ]
@@ -1159,7 +1291,7 @@
                         {
                             "name": "Normal",
                             "slots": 2,
-                            "price": 5
+                            "price": 15
                         }
                     ]
                 },
@@ -1204,7 +1336,7 @@
                 {
                     "name": "Hand Crossbow",
                     "ammoSlots": 2,
-                    "bloodlineLevel": 4,
+                    "bloodlineLevel": 21,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1230,7 +1362,7 @@
                         },
                         {
                             "name": "Choke",
-                            "price": 20,
+                            "price": 10,
                             "type": "Special"
                         }
                     ]
@@ -1238,7 +1370,7 @@
                 {
                     "name": "Crossbow",
                     "ammoSlots": 2,
-                    "bloodlineLevel": 4,
+                    "bloodlineLevel": 21,
                     "variants": [
                         {
                             "name": "Normal",
@@ -1254,12 +1386,12 @@
                         },
                         {
                             "name": "Explosive",
-                            "price": 70,
+                            "price": 35,
                             "type": "Special"
                         },
                         {
                             "name": "Shot",
-                            "price": 80,
+                            "price": 40,
                             "type": "Special"
                         }
                     ]
@@ -1283,17 +1415,17 @@
                         },
                         {
                             "name": "Poison",
-                            "price": 65,
+                            "price": 25,
                             "type": "Special"
                         },
                         {
                             "name": "Concertina",
-                            "price": 85,
+                            "price": 30,
                             "type": "Special"
                         },
                         {
                             "name": "Frag",
-                            "price": 77,
+                            "price": 70,
                             "type": "Special"
                         }
                     ]
@@ -1319,7 +1451,7 @@
                     "variants": [
                         {
                             "name": "Knife",
-                            "price": 20
+                            "price": 30
                         },
                         {
                             "name": "Throwing Knives",
@@ -1327,7 +1459,7 @@
                         },
                         {
                             "name": "Heavy Knife",
-                            "price": 25
+                            "price": 20
                         }
                     ]
                 },
@@ -1385,7 +1517,7 @@
                 },
                 {
                     "name": "Choke Bomb",
-                    "bloodlineLevel": 10,
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Choke Bomb",
@@ -1395,7 +1527,7 @@
                 },
                 {
                     "name": "Deception",
-                    "bloodlineLevel": 32,
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Decoys",
@@ -1421,7 +1553,7 @@
                     "variants": [
                         {
                             "name": "Concertina Trip Mines",
-                            "price": 8
+                            "price": 90
                         }
                     ]
                 },
@@ -1437,7 +1569,7 @@
                 },
                 {
                     "name": "Quad Derringer",
-                    "bloodlineLevel": 66,
+                    "bloodlineLevel": 80,
                     "variants": [
                         {
                             "name": "Quad Derringer",
@@ -1456,7 +1588,7 @@
                     "variants": [
                         {
                             "name": "Vitality Shot (Weak)",
-                            "price": 10
+                            "price": 20
                         },
                         {
                             "name": "Stamina Shot (Weak)",
@@ -1464,11 +1596,11 @@
                         },
                         {
                             "name": "Regeneration Shot (Weak)",
-                            "price": 65
+                            "price": 20
                         },
                         {
                             "name": "Vitality Shot",
-                            "price": 65
+                            "price": 85
                         },
                         {
                             "name": "Stamina Shot",
@@ -1476,7 +1608,7 @@
                         },
                         {
                             "name": "Regeneration Shot",
-                            "price": 110
+                            "price": 85
                         }
                     ]
                 },
@@ -1504,15 +1636,15 @@
                 },
                 {
                     "name": "Fire",
-                    "bloodlineLevel": 3,
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Fire Bomb",
-                            "price": 18
+                            "price": 30
                         },
                         {
                             "name": "Liquid Fire Bomb",
-                            "price": 23
+                            "price": 35
                         },
                         {
                             "name": "Hellfire Bomb",
@@ -1522,7 +1654,7 @@
                 },
                 {
                     "name": "Explosives",
-                    "bloodlineLevel": 8,
+                    "bloodlineLevel": 6,
                     "variants": [
                         {
                             "name": "Dynamite Stick",
@@ -1542,7 +1674,7 @@
                         },
                         {
                             "name": "Frag Bomb",
-                            "price": 70
+                            "price": 103
                         },
                         {
                             "name": "Big Dynamite Bundle",
@@ -1551,8 +1683,18 @@
                     ]
                 },
                 {
+                    "name": "Stalker Beetle",
+                    "bloodlineLevel": 15,
+                    "variants": [
+                        {
+                            "name": "Stalker Beetle",
+                            "price": 45
+                        }
+                    ]
+                },
+                {
                     "name": "Deception",
-                    "bloodlineLevel": 32,
+                    "bloodlineLevel": 1,
                     "variants": [
                         {
                             "name": "Chaos Bomb",
@@ -1576,7 +1718,7 @@
                 },
                 {
                     "name": "Restock",
-                    "bloodlineLevel": 80,
+                    "bloodlineLevel": 74,
                     "variants": [
                         {
                             "name": "Ammo Box",
