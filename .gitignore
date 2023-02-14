@@ -106,4 +106,8 @@ dist
 # Config file
 config.json
 
+# Resources
 res/contests/
+res/chary.sqlite
+
+notes/

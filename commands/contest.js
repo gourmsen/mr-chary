@@ -3,10 +3,16 @@ require('better-logging')(console);
 
 var MESSAGE, ARGS;
 
+// database
+const DB_PATH = 'res/chary.sqlite';
+var SQL, DATABASE_DATA, RECORDS, MODTIME;
+
+// contest states
 const STAT_OPEN = 'Open';
 const STAT_STARTED = 'Started';
 const STAT_CLOSED = 'Closed';
 
+// error codes
 const ERR_CONTEST_NOT_FOUND = 1;
 const ERR_ENTRY_COUNT = 2;
 const ERR_OBJECTIVE_MINIMUM = 3;
@@ -29,6 +35,8 @@ module.exports = {
 
         MESSAGE = message;
         ARGS = args;
+
+        init();
 
         switch(ARGS[0]) {
             // functions
@@ -79,29 +87,35 @@ module.exports = {
 }
 
 function createContest() {
-    const fs = require('fs');
     const crypto = require('crypto');
 
-    var contestId, filePath, contestCreationDate, contestState, contestAuthorId, contestAuthorName, contestEntryCount, contestCurrentRound, contestMaxRoundCount, contestObjectives;
-
     // generate unique contest id
-    contestId = crypto.randomBytes(3).toString("hex");
-    filePath = 'res/contests/' + contestId + '.json';
+    var contestId = crypto.randomBytes(3).toString("hex");
+
+    var contests;
     while (true) {
-        if (!fs.existsSync(filePath)) {
+        // query contests
+        SQL = "SELECT contestId FROM contests WHERE contestId = ?";
+        DATABASE_DATA = [contestId];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        contests = RECORDS;
+
+        // check existing contest
+        if (!contests.length) {
             break;
         }
 
         contestId = crypto.randomBytes(3).toString("hex");
-        filePath = 'res/contests/' + contestId + '.json';
     }
 
-    // basic fields
-    contestCreationDate = new Date().toJSON();
+    // fill basic fields
+    var contestCreationDate = new Date().toJSON();
 
-    contestState = STAT_OPEN;
-    contestAuthorId = MESSAGE.author.id;
-    contestAuthorName = MESSAGE.author.username;
+    var contestState = STAT_OPEN;
+    var contestAuthorId = MESSAGE.author.id;
+    var contestAuthorName = MESSAGE.author.username;
+    var contestCurrentRound = 1;
 
     // check for entry count
     if (ARGS.length < 2) {
@@ -109,14 +123,12 @@ function createContest() {
         return ERR_ENTRY_COUNT;
     }
 
-    // entry count
-    contestEntryCount = parseInt(ARGS[1]);
+    // fill entry count
+    var contestEntryCount = parseInt(ARGS[1]);
     if (isNaN(contestEntryCount)) {
         MESSAGE.channel.send("Enter a numeric value for the entry count...");
         return ERR_NOT_NUMERIC;
     }
-
-    contestCurrentRound = 1;
 
     // check for maximum round count
     if (ARGS.length < 3) {
@@ -124,8 +136,8 @@ function createContest() {
         return ERR_ROUND_COUNT;
     }
 
-    // maximum round count
-    contestMaxRoundCount = parseInt(ARGS[2]);
+    // fill maximum round count
+    var contestMaxRoundCount = parseInt(ARGS[2]);
     if (isNaN(contestMaxRoundCount)) {
         MESSAGE.channel.send("Enter a numeric value for the maximium round count...");
         return ERR_NOT_NUMERIC;
@@ -137,13 +149,14 @@ function createContest() {
         return ERR_OBJECTIVE_MINIMUM;
     }
 
-    // contest objectives
-    contestObjectives = [];
-
+    // fill contest objectives
+    var contestObjectives = [];
     var objectiveName, objectiveValue;
+
     for (var i = 3; i < ARGS.length; i++) {
         objectiveName = ARGS[i].substr(0, ARGS[i].indexOf('='));
-        objectiveValue = parseInt(ARGS[i].split('=')[1]);
+        objectiveValue = parseFloat(ARGS[i].split('=')[1]);
+
         if (isNaN(objectiveValue)) {
             MESSAGE.channel.send("Enter a numeric value for objective `" + objectiveName + "`..." );
             return ERR_NOT_NUMERIC;
@@ -157,25 +170,56 @@ function createContest() {
         contestObjectives.push(objectivePair);
     }
 
-    // prepare contest data
-    var contestData = {
-        "contest": {
-            "id": contestId,
-            "creationDate": contestCreationDate,
-            "state": contestState,
-            "authorId": contestAuthorId,
-            "authorName": contestAuthorName,
-            "entryCount": contestEntryCount,
-            "currentRound": contestCurrentRound,
-            "maxRoundCount": contestMaxRoundCount,
-            "rated": false,
-            "objectives": contestObjectives
-        },
-        "attendees": []
-    };
+    // prepare contest data for table "contests_objectives"
+    for (var i = 0; i < contestObjectives.length; i++) {
+        MODTIME = getModtime();
 
-    // create contest file
-    writeContestData(contestId, contestData);
+        SQL = `INSERT INTO contest_objectives(
+            contestId,
+            name,
+            value,
+            modtime
+            ) VALUES (?, ?, ?, ?)`;
+
+        DATABASE_DATA = [
+            contestId,
+            contestObjectives[i].name,
+            contestObjectives[i].value,
+            MODTIME
+        ];
+
+        writeDatabase(SQL, DATABASE_DATA);
+    }
+
+    // prepare contest data for table "contests"
+    MODTIME = getModtime();
+
+    SQL = `INSERT INTO contests(
+        contestId,
+        creationDate,
+        state,
+        authorId,
+        authorName,
+        entryCount,
+        currentRound,
+        maxRoundCount,
+        rated,
+        modtime
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    DATABASE_DATA = [
+        contestId,
+        contestCreationDate,
+        contestState,
+        contestAuthorId,
+        contestAuthorName,
+        contestEntryCount,
+        contestCurrentRound,
+        contestMaxRoundCount,
+        0,
+        MODTIME];
+
+    writeDatabase(SQL, DATABASE_DATA);
 
     MESSAGE.channel.send("Contest `" + contestId + "` created!");
     console.info(contestAuthorName + ' (' + contestAuthorId + ') ' + "has created contest '" + contestId + "'!");
@@ -184,54 +228,83 @@ function createContest() {
 }
 
 function joinContest() {
-    var contestId, contestData, attendeeId, attendeeName;
+    var contestId = ARGS[1];
 
-    contestId = ARGS[1];
-    contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+    // query contests
+    SQL = "SELECT contestId, state FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // check existing contest
+    if (!contests.length) {
+        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
+        return ERR_CONTEST_NOT_FOUND;
+    }
 
     // only joinable, when in open state
-    if (contestData.contest.state !== STAT_OPEN) {
+    if (contests[0].state !== STAT_OPEN) {
         MESSAGE.channel.send("Contest can't be joined anymore...");
         return ERR_NOT_OPEN;
     }
 
-    attendeeId = MESSAGE.author.id;
-    attendeeName = MESSAGE.author.username;
+    var attendeeId = MESSAGE.author.id;
+    var attendeeName = MESSAGE.author.username;
+
+    // query attendees
+    SQL = "SELECT attendeeId FROM contest_attendees WHERE contestId = ? AND attendeeId = ?";
+    DATABASE_DATA = [contestId, attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendees = RECORDS;
 
     // check for duplicates
-    for (var i = 0; i < contestData.attendees.length; i++) {
-        if (contestData.attendees[i].id === attendeeId) {
-            MESSAGE.channel.send("You've already joined this contest...");
-            return ERR_ALREADY_JOINED;
-        }
+    if (contestAttendees.length) {
+        MESSAGE.channel.send("You've already joined this contest...");
+        return ERR_ALREADY_JOINED;
     }
 
-    // prepare attendee data
-    var attendeeData = {
-        "id": attendeeId,
-        "name": attendeeName,
-        "entries": []
-    }
+    // prepare contest data for table "contest_attendees"
+    MODTIME = getModtime();
 
-    // write attendee data to contest file
-    contestData.attendees.push(attendeeData);
-    writeContestData(contestId, contestData);
+    SQL = `INSERT INTO contest_attendees(
+        contestId,
+        attendeeId,
+        name,
+        modtime
+        ) VALUES (?, ?, ?, ?)`;
+
+    DATABASE_DATA = [
+        contestId,
+        attendeeId,
+        attendeeName,
+        MODTIME];
+
+    writeDatabase(SQL, DATABASE_DATA);
 
     MESSAGE.channel.send("You're now competing in this contest!");
     console.info(attendeeName + ' (' + attendeeId + ') ' + "has joined contest '" + contestId + "'!");
 }
 
 function infoContest() {
-    var contestId, contestData;
-    
-    contestId = ARGS[1];
+    var contestId = ARGS[1];
 
-    contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+    // query contests
+    SQL = "SELECT contestId, currentRound FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // check existing contest
+    if (!contests.length) {
+        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
+        return ERR_CONTEST_NOT_FOUND;
+    }
 
     // print all round sheets
-    for (var i = 0; i < contestData.contest.currentRound; i++) {
+    for (var i = 0; i < contests[0].currentRound; i++) {
         printRoundSheet(contestId, i + 1);
     }
 
@@ -239,12 +312,12 @@ function infoContest() {
 }
 
 function listContests() {
-    const fs = require('fs');
+    // query contests
+    SQL = "SELECT contestId, entryCount, state, authorName, creationDate FROM contests";
+    DATABASE_DATA = [];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
-    var filePath, contests;
-    
-    filePath = 'res/contests/';
-    contests = fs.readdirSync(filePath);
+    var contests = RECORDS;
 
     // check for no contests
     if (!contests.length) {
@@ -252,28 +325,21 @@ function listContests() {
         return ERR_NO_CONTESTS;
     }
 
-    var contestId, contestData;
-
+    // list contests
     var contestsString = "";
-    for (var i = 0; i < contests.length; i++) {
-        
-        contestId = contests[i].substr(0, contests[i].indexOf('.'));
-        contestData = getContestData(contestId);
-        if (contestData === ERR_CONTEST_NOT_FOUND) return;
-
-
+    for(var i = 0; i < contests.length; i++) {
         // prepare contest string for this contest
         contestsString = contestsString + '• `';
 
         // display entry count (mode)
-        if (contestData.contest.entryCount > 0) {
+        if (contests[i].entryCount > 0) {
             contestsString = contestsString + '🏅 ';
         } else {
             contestsString = contestsString + '🎪 ';
         }
 
         // display contest state
-        switch(contestData.contest.state) {
+        switch(contests[i].state) {
             case STAT_OPEN:
                 contestsString = contestsString + '🟦 ';
                 break;
@@ -288,7 +354,7 @@ function listContests() {
                 break;
         }
 
-        contestsString = contestsString + contestId + " (Author: " + contestData.contest.authorName + ") - (Created: " + contestData.contest.creationDate.substr(0, 10) + ")`\n";
+        contestsString = contestsString + contests[i].contestId + " (Author: " + contests[i].authorName + ") - (Created: " + contests[i].creationDate.substr(0, 10) + ")`\n";
     }
 
     // show embed
@@ -308,109 +374,132 @@ function listContests() {
 }
 
 function personalStats() {
-    var contestId, contestData;
-    
-    contestId = ARGS[1];
+    var contestId = ARGS[1];
 
-    contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+    // query contests
+    SQL = "SELECT * FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
-    var isAttending = false;
-    for (var i = 0; i < contestData.attendees.length; i++) {
-        if (contestData.attendees[i].id === MESSAGE.author.id) {
-            isAttending = true;
+    var contests = RECORDS;
 
-            // show embed
-            const embed = new MessageEmbed()
-            .setTitle("🤠 Personal Statistics")
-            .setDescription("Logged for contest `" + contestId + '`')
-            .setColor("#6666ff")
-            .setTimestamp();
-
-            // prepare entries
-            var entriesString = "";
-            for (var j = 0; j < contestData.attendees[i].entries.length; j++) {
-                entriesString = entriesString + '`' + contestData.attendees[i].entries[j].id + ':` ';
-
-                // entry values
-                for (var k = 0; k < contestData.attendees[i].entries[j].values.length; k++) {
-                    entriesString = entriesString + '`' + contestData.attendees[i].entries[j].values[k].value + 'x ' + contestData.attendees[i].entries[j].values[k].objective + '` ';
-                }
-
-                entriesString = entriesString + '\n';
-            }
-
-            if (entriesString) {
-                embed.addFields({
-                    name: "Entries",
-                    value: entriesString,
-                    inline: false
-                });
-            }
-
-            // prepare statistics
-            var objectiveStatistics = new Array(contestData.contest.objectives.length).fill(Number(0));
-            for (var j = 0; j < contestData.attendees[i].entries.length; j++) {
-                for (var k = 0; k < contestData.attendees[i].entries[j].values.length; k++) {
-                    objectiveStatistics[k] = objectiveStatistics[k] + Number(contestData.attendees[i].entries[j].values[k].value);
-                }
-            }
-
-            for (var j = 0; j < contestData.contest.objectives.length; j++) {
-                if (objectiveStatistics != 0) {
-                    embed.addFields({
-                        name: contestData.contest.objectives[j].name,
-                        value: objectiveStatistics[j].toString(),
-                        inline: false
-                    });
-                }
-            }
-
-            MESSAGE.channel.send({ embeds: [embed] });
-        }
+    // check existing contest
+    if (!contests.length) {
+        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
+        return ERR_CONTEST_NOT_FOUND;
     }
 
+    var attendeeId = MESSAGE.author.id;
+
+    // query attendees
+    SQL = "SELECT * FROM contest_attendees WHERE contestId = ? AND attendeeId = ?";
+    DATABASE_DATA = [contestId, attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendees = RECORDS;
+
     // check for attendance
-    if (!isAttending) {
+    if (!contestAttendees.length) {
         MESSAGE.channel.send("You're not attending this contest...");
         return ERR_NOT_ATTENDING;
     }
+
+    // query entries distinctly
+    SQL = "SELECT DISTINCT entryId FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ? ORDER BY modtime ASC";
+    DATABASE_DATA = [contestId, attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeEntriesDistinct = RECORDS;
+
+    // display entry values
+    var entriesString = "";
+    var contestAttendeeEntries;
+    for (var i = 0; i < contestAttendeeEntriesDistinct.length; i++) {
+        // query entries
+        SQL = "SELECT objectiveName, objectiveValue FROM contest_attendee_entries WHERE entryId = ? ORDER BY modtime ASC";
+        DATABASE_DATA = [contestAttendeeEntriesDistinct[i].entryId];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+    
+        contestAttendeeEntries = RECORDS;
+
+        // calculate entry values
+        entriesString = entriesString + '`' + contestAttendeeEntriesDistinct[i].entryId + '`: '
+        for (var j = 0; j < contestAttendeeEntries.length; j++) {
+            entriesString = entriesString + '`' + contestAttendeeEntries[j].objectiveValue + 'x ' + contestAttendeeEntries[j].objectiveName + '` ';
+        }
+
+        entriesString = entriesString + '\n';
+    }
+
+    // show embed
+    const embed = new MessageEmbed()
+    .setTitle("🤠 Personal Statistics")
+    .setDescription("Logged for contest `" + contestId + '`')
+    .setColor("#6666ff")
+    .setTimestamp();
+
+    if (entriesString) {
+        embed.addFields({
+            name: "Entries",
+            value: entriesString,
+            inline: false
+        });
+    }
+
+    MESSAGE.channel.send({ embeds: [embed] });
 }
 
 function stateContest(state) {
-    var contestId, contestData;
+    var contestId = ARGS[1];
 
-    contestId = ARGS[1];
-    contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+    // query contests
+    SQL = "SELECT authorId, state, currentRound FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
-    // author check
-    if (contestData.contest.authorId !== MESSAGE.author.id) {
+    var contests = RECORDS;
+
+    // check existing contest
+    if (!contests.length) {
+        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
+        return ERR_CONTEST_NOT_FOUND;
+    }
+
+    // check author
+    if (contests[0].authorId !== MESSAGE.author.id) {
         MESSAGE.channel.send("Only the contest author can change the state...");
         return ERR_ONLY_AUTHOR;
     }
 
     // check for state change
-    if (contestData.contest.state === state) {
+    if (contests[0].state === state) {
         MESSAGE.channel.send("Contest is already in this state...");
         return ERR_SAME_STATE;
     }
 
-    // check if already closed
-    if (contestData.contest.state === 'Closed') {
+    // check closed
+    if (contests[0].state === 'Closed') {
         MESSAGE.channel.send("What's dead should stay dead...");
         return ERR_DEAD_CONTEST;
     }
 
-    contestData.contest.state = state;
+    // prepare contest data for table "contests"
+    MODTIME = getModtime();
 
-    // write state to contest file
-    writeContestData(contestId, contestData);
+    SQL = `UPDATE contests SET state = ?, modtime = ? WHERE contestId = ?`;
 
-    switch (contestData.contest.state) {
+    DATABASE_DATA = [
+        state,
+        MODTIME,
+        contestId];
+
+    writeDatabase(SQL, DATABASE_DATA);
+
+    switch (state) {
         case 'Started':
             MESSAGE.channel.send("Contest has been started!");
             console.info("Contest '" + contestId + "' has been started!")
+
             printContestSheet(contestId);
             break;
         case 'Closed':
@@ -418,60 +507,78 @@ function stateContest(state) {
             console.info("Contest '" + contestId + "' has been closed!")
 
             // print all round sheets
-            for (var i = 0; i < contestData.contest.currentRound; i++) {
+            for (var i = 0; i < contests[0].currentRound; i++) {
                 printRoundSheet(contestId, i + 1);
             }
 
             printContestSheet(contestId);
-            
             break;
         default:
             break;
     }
 }
 
-
 function roundContest() {
-    var contestId, contestData;
+    var contestId = ARGS[1];
 
-    contestId = ARGS[1];
-    contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+    // query contests
+    SQL = "SELECT authorId, maxRoundCount, currentRound FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
 
     // author check
-    if (contestData.contest.authorId !== MESSAGE.author.id) {
+    if (contests[0].authorId !== MESSAGE.author.id) {
         MESSAGE.channel.send("Only the contest author can change the current round...");
         return ERR_ONLY_AUTHOR;
     }
 
-    contestData.contest.currentRound++;
-
     // check if last round
-    if (contestData.contest.maxRoundCount > 0 && contestData.contest.currentRound > contestData.contest.maxRoundCount) {
+    if (contests[0].maxRoundCount > 0 && contests[0].currentRound > contests[0].maxRoundCount) {
         stateContest(STAT_CLOSED);
         return;
     }
 
-    // write new round to contest file
-    writeContestData(contestId, contestData);
+    // prepare contest data for table "contests"
+    MODTIME = getModtime();
 
-    MESSAGE.channel.send("Round " + contestData.contest.currentRound + " has started!");
-    console.info("Contest '" + contestId + "' has reached round " + contestData.contest.currentRound + "!");
-    printRoundSheet(contestId, contestData.contest.currentRound - 1);
+    SQL = `UPDATE contests SET currentRound = ?, modtime = ? WHERE contestId = ?`;
+
+    DATABASE_DATA = [
+        contests[0].currentRound + 1,
+        MODTIME,
+        contestId];
+
+    writeDatabase(SQL, DATABASE_DATA);
+
+    MESSAGE.channel.send("Round " + (contests[0].currentRound + 1) + " has started!");
+    console.info("Contest '" + contestId + "' has reached round " + (contests[0].currentRound + 1) + "!");
+
+    printRoundSheet(contestId, contests[0].currentRound);
     printContestSheet(contestId);
 }
 
 function entryContest() {
     const crypto = require('crypto');
 
-    var contestId, contestData;
+    var contestId = ARGS[1];
 
-    contestId = ARGS[1];
-    contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+    // query contests
+    SQL = "SELECT state, entryCount, currentRound FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // check existing contest
+    if (!contests.length) {
+        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
+        return ERR_CONTEST_NOT_FOUND;
+    }
 
     // check, whether contest is in state started
-    switch (contestData.contest.state) {
+    switch (contests[0].state) {
         case STAT_OPEN:
             MESSAGE.channel.send("Contest `" + contestId + "` hasn't started, yet...");
             return ERR_NOT_STARTED;
@@ -483,176 +590,184 @@ function entryContest() {
     }
 
     // check for attendee
-    var isAttending = false;
-    for (var i = 0; i < contestData.attendees.length; i++) {
-        if (contestData.attendees[i].id === MESSAGE.author.id) {
-            isAttending = true;
+    var attendeeId = MESSAGE.author.id;
 
-            // check for too many entries
-            if (contestData.contest.entryCount > 0) {
-                if (contestData.attendees[i].entries.length >= contestData.contest.entryCount) {
-                    MESSAGE.channel.send("You can't log more entries...");
-                    return ERR_MAXIMUM_ENTRIES;
-                }
-            }
+    // query attendees
+    SQL = "SELECT attendeeId FROM contest_attendees WHERE contestId = ? AND attendeeId = ?";
+    DATABASE_DATA = [contestId, attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
-            // generate unique entry id
-            var entryId, isDuplicate;
-
-            entryId = crypto.randomBytes(5).toString("hex");
-            isDuplicate = false;
-            while (true) {
-                isDuplicate = false;
-                for (var j = 0; j < contestData.attendees[i].entries.length; j++) {
-                    if (entryId === contestData.attendees[i].entries[j].id) {
-                        isDuplicate = true;
-                    }
-                }
-
-                if (!isDuplicate) {
-                    break;
-                }
-
-                entryId = crypto.randomBytes(5).toString("hex");
-            }
-
-            // prepare entry data
-            var objectiveId, objectiveValue;
-            var entryValues = [];
-            for (var j = 0; j < contestData.contest.objectives.length; j++) {
-
-                // check, whether objective is in arguments and fill value
-                for (var k = 2; k < ARGS.length; k++) {
-                    objectiveId = parseInt(ARGS[k].substr(0, ARGS[k].indexOf('=')));
-
-                    // check numeric
-                    if (isNaN(objectiveId)) {
-                        MESSAGE.channel.send("Objective ID `" + objectiveId + "` is not numeric...");
-                        return ERR_NOT_NUMERIC;
-                    }
-
-                    if (objectiveId - 1 === j) {
-                        objectiveValue = parseInt(ARGS[k].split('=')[1]);
-
-                        // check numeric
-                        if (isNaN(objectiveValue)) {
-                            MESSAGE.channel.send("Enter a numeric value for objective ID`" + objectiveId + "`...");
-                            return ERR_NOT_NUMERIC;
-                        }
-
-                        break;
-                    } else {
-                        objectiveValue = 0;
-                    }
-                }
-
-                valueData = {
-                    "objective": contestData.contest.objectives[j].name,
-                    "value": objectiveValue
-                }
-
-                entryValues.push(valueData);
-            }
-
-            entryData = {
-                "id": entryId,
-                "round": contestData.contest.currentRound,
-                "values": entryValues
-            }
-            
-            contestData.attendees[i].entries.push(entryData);
-        }
-    }
+    var contestAttendees = RECORDS;
 
     // check for attendance
-    if (!isAttending) {
+    if (!contestAttendees.length) {
         MESSAGE.channel.send("You're not attending this contest...");
         return ERR_NOT_ATTENDING;
     }
-    
-    // write entry to contest file
-    writeContestData(contestId, contestData);
 
+    // check for too many entries
+    if (contests[0].entryCount > 0) {
+        // query entries distinctly
+        SQL = "SELECT DISTINCT entryId FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ?";
+        DATABASE_DATA = [contestId, attendeeId];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var contestAttendeeEntriesDistinct = RECORDS;
+
+        if (contestAttendeeEntriesDistinct.length >= contests[0].entryCount) {
+            MESSAGE.channel.send("You can't log more entries...");
+            return ERR_MAXIMUM_ENTRIES;
+        }
+    }
+
+    // generate unique entry id
+    var entryId = crypto.randomBytes(5).toString("hex");
+    var contestAttendeeEntries;
+    while (true) {
+        // query entries
+        SQL = "SELECT entryId FROM contest_attendee_entries WHERE entryId = ?";
+        DATABASE_DATA = [entryId];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        contestAttendeeEntries = RECORDS;
+
+        // check existing entry
+        if (!contestAttendeeEntries.length) {
+            break;
+        }
+
+        entryId = crypto.randomBytes(5).toString("hex");
+    }
+
+    // query objectives
+    SQL = "SELECT name FROM contest_objectives WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestObjectives = RECORDS;
+
+    // check whether objective is in arguments and fill value
+    var objectiveId, objectiveValue;
+    for (var i = 0; i < contestObjectives.length; i++) {
+        for (var j = 2; j < ARGS.length; j++) {
+            objectiveId = parseInt(ARGS[j].substr(0, ARGS[j].indexOf('=')));
+
+            // check numeric
+            if (isNaN(objectiveId)) {
+                continue;
+            }
+
+            // fill objective value
+            if (objectiveId - 1 === i) {
+                objectiveValue = parseFloat(ARGS[j].split('=')[1]);
+
+                // check numeric
+                if (isNaN(objectiveValue)) {
+                    MESSAGE.channel.send("Value for objective `" + contestObjectives[i].name + "` couldn't be logged...");
+                    console.info("Value for objective '" + contestObjectives[i].name + "' couldn't be logged by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')...');
+
+                    objectiveValue = 0;
+                }
+
+                break;
+            } else {
+                objectiveValue = 0;
+            }
+        }
+
+        // prepare contest data for table "contest_attendee_entries"
+        MODTIME = getModtime();
+
+        SQL = `INSERT INTO contest_attendee_entries(
+            contestId,
+            attendeeId,
+            entryId,
+            objectiveName,
+            objectiveValue,
+            round,
+            modtime
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+        DATABASE_DATA = [
+            contestId,
+            attendeeId,
+            entryId,
+            contestObjectives[i].name,
+            objectiveValue,
+            contests[0].currentRound,
+            MODTIME];
+
+        writeDatabase(SQL, DATABASE_DATA);
+    }
+    
     MESSAGE.channel.send("Your entry `" + entryId + "` has been logged!");
     console.info(MESSAGE.author.username + ' (' + MESSAGE.author.id + ') ' + "has logged an entry '" + entryId + "' in contest '" + contestId + "'!");
 
     isFinished = checkFinished(contestId);
     if (isFinished) {
-        contestData.contest.state = STAT_CLOSED;
+        // prepare contest data for table "contests"
+        MODTIME = getModtime();
 
-        writeContestData(contestId, contestData);
-
+        SQL = `UPDATE contests SET state = ?, modtime = ? WHERE contestId = ?`;
+    
+        DATABASE_DATA = [
+            STAT_CLOSED,
+            MODTIME,
+            contestId];
+    
+        writeDatabase(SQL, DATABASE_DATA);
+    
         MESSAGE.channel.send("Contest has been closed!");
         console.info("Contest '" + contestId + "' has been closed!")
         printContestSheet(contestId);
     }
 }
 
-function getContestData(contestId) {
-    const fs = require('fs');
-
-    var filePath, contestFile, contestData;
-
-    filePath = 'res/contests/' + contestId + '.json';
-
-    // check, whether contest exists
-    if (!fs.existsSync(filePath)) {
-        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
-        return ERR_CONTEST_NOT_FOUND;
-    }
-
-    // read contest data out of contest file
-    contestFile = fs.readFileSync(filePath, 'utf-8');
-    contestData;
-    try {
-        contestData = JSON.parse(contestFile);
-    } catch (err) {
-        console.error(err);
-    }
-
-    return contestData;
-}
-
-function writeContestData(contestId, contestData) {
-    const fs = require('fs');
-
-    var filePath;
-
-    filePath = 'res/contests/' + contestId + '.json';
-
-    // write attendee to contest file
-    try {
-        fs.writeFileSync(filePath, JSON.stringify(contestData, null, 4));
-    } catch (err) {
-        console.error(err);
-    }
+function init() {
+    initializeDatabase();
 }
 
 function printContestSheet(contestId) {
-    var contestData;
-
-    contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
-
     // create embed
     const embed = new MessageEmbed()
     .setDescription("")
     .setTimestamp();
 
+    // query contests
+    SQL = "SELECT * FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // query objectives
+    SQL = "SELECT * FROM contest_objectives WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestObjectives = RECORDS;
+
+    // query attendees
+    SQL = "SELECT * FROM contest_attendees WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendees = RECORDS;
+
     // display objectives example
     var objectivesStringExample = "";
-    for (var i = 0; i < contestData.contest.objectives.length; i++) {
+    for (var i = 0; i < contestObjectives.length; i++) {
         objectivesStringExample = objectivesStringExample + ' ' + (i + 1) + '=' + "0";
     }
 
     // prepare rated symbol
     var ratedString = "";
-    if (contestData.contest.rated === true) {
+    if (contests[0].rated === true) {
         ratedString = " • `⭐`";
     }
 
     // display contest state
-    switch(contestData.contest.state) {
+    switch(contests[0].state) {
         case STAT_OPEN:
             embed.setTitle("Contest `[" + contestId + "]` • `[OPEN]`" + ratedString);
             embed.setDescription("`!cry contest join " + contestId + '`');
@@ -676,10 +791,10 @@ function printContestSheet(contestId) {
     }
 
     // display entry count (mode)
-    if (contestData.contest.entryCount > 0) {
+    if (contests[0].entryCount > 0) {
         embed.addFields({
             name: "Tournament Mode 🏅",
-            value: "Limited to " + contestData.contest.entryCount + " entries per attendee",
+            value: "Limited to " + contests[0].entryCount + " entries per attendee",
             inline: false
         });
     } else {
@@ -692,8 +807,8 @@ function printContestSheet(contestId) {
 
     // display objectives
     var objectivesString = "";
-    for (var i = 0; i < contestData.contest.objectives.length; i++) {
-        objectivesString = objectivesString + '`[' + (i + 1) + ']` ' + contestData.contest.objectives[i].name + ' (' + contestData.contest.objectives[i].value + ' Points)\n';
+    for (var i = 0; i < contestObjectives.length; i++) {
+        objectivesString = objectivesString + '`[' + (i + 1) + ']` ' + contestObjectives[i].name + ' (' + contestObjectives[i].value + ' Points)\n';
     }
 
     embed.addFields({
@@ -703,21 +818,22 @@ function printContestSheet(contestId) {
     });
 
     // displays attendees
-    var attendeePoints, attendeePointsRounded;
     var attendees = [];
-    for (var i = 0; i < contestData.attendees.length; i++) {
-
+    var attendeePoints, attendeePointsRounded;
+    for (var i = 0; i < contestAttendees.length; i++) {
         // calculate points
-        attendeePoints = calculatePoints(contestData.contest.id, contestData.attendees[i].id, 0);
+        attendeePoints = calculatePoints(contestId, contestAttendees[i].attendeeId, 0);
         attendeePointsRounded = Math.round(attendeePoints * 100) / 100;
 
         var attendeeData = {
-            "name": contestData.attendees[i].name,
+            "name": contestAttendees[i].name,
             "points": attendeePointsRounded
         }
+
         attendees.push(attendeeData);
     }
 
+    // sort attendees
     var sortedAttendees = sortAttendees(attendees);
 
     var podiumString = "";
@@ -787,15 +903,31 @@ function printContestSheet(contestId) {
 }
 
 function printRoundSheet(contestId, contestRound) {
-    var contestData;
-
-    contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
-
     // create embed
     const embed = new MessageEmbed()
     .setDescription("")
     .setTimestamp();
+
+    // query contests
+    SQL = "SELECT * FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // query objectives
+    SQL = "SELECT * FROM contest_objectives WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestObjectives = RECORDS;
+
+    // query attendees
+    SQL = "SELECT * FROM contest_attendees WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendees = RECORDS;
 
     // display contest round
     embed.setTitle("Round " + contestRound);
@@ -803,18 +935,18 @@ function printRoundSheet(contestId, contestRound) {
     embed.setColor("#cc6699");
 
     // displays attendees
-    var attendeePoints, attendeePointsRounded;
     var attendees = [];
-    for (var i = 0; i < contestData.attendees.length; i++) {
-
+    var attendeePoints, attendeePointsRounded;
+    for (var i = 0; i < contestAttendees.length; i++) {
         // calculate points
-        attendeePoints = calculatePoints(contestData.contest.id, contestData.attendees[i].id, contestRound);
+        attendeePoints = calculatePoints(contestId, contestAttendees[i].attendeeId, contestRound);
         attendeePointsRounded = Math.round(attendeePoints * 100) / 100;
 
         var attendeeData = {
-            "name": contestData.attendees[i].name,
+            "name": contestAttendees[i].name,
             "points": attendeePointsRounded
         }
+
         attendees.push(attendeeData);
     }
 
@@ -836,30 +968,26 @@ function printRoundSheet(contestId, contestRound) {
     // prepare player statistics
     var playerStatisticsString = "";
     var objectiveStatistics;
-    for (var i = 0; i < contestData.attendees.length; i++) {
-
-        playerStatisticsString = playerStatisticsString + "• " + contestData.attendees[i].name + "\n";
-        objectiveStatistics = new Array(contestData.contest.objectives.length).fill(Number(0));
+    var contestAttendeeEntries;
+    for (var i = 0; i < contestAttendees.length; i++) {
+        playerStatisticsString = playerStatisticsString + "• " + contestAttendees[i].name + "\n";
+        objectiveStatistics = new Array(contestObjectives.length).fill(Number(0));
 
         // go through all objectives
-        for (var j = 0; j < contestData.contest.objectives.length; j++) {
+        for (var j = 0; j < contestObjectives.length; j++) {
+            // query entries
+            SQL = "SELECT * FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ? AND objectiveName = ? AND round = ?";
+            DATABASE_DATA = [contestId, contestAttendees[i].attendeeId, contestObjectives[j].name, contestRound];
+            RECORDS = queryDatabase(SQL, DATABASE_DATA);
+            
+            contestAttendeeEntries = RECORDS;
 
-            // go through all entries
-            for (var k = 0; k < contestData.attendees[i].entries.length; k++) {
-
-                // go through all values and add them to the objectives statistic
-                for (var l = 0; l < contestData.attendees[i].entries[k].values.length; l++) {
-
-                    if (contestData.attendees[i].entries[k].values[l].objective === contestData.contest.objectives[j].name) {
-                        if (contestData.attendees[i].entries[k].round === contestRound) {
-                            objectiveStatistics[j] = objectiveStatistics[j] + contestData.attendees[i].entries[k].values[l].value;
-                        }
-                    }
-                }
+            for (var k = 0; k < contestAttendeeEntries.length; k++) {
+                objectiveStatistics[j] = objectiveStatistics[j] + contestAttendeeEntries[k].objectiveValue;
             }
 
             // display objective values
-            playerStatisticsString = playerStatisticsString + "`" + objectiveStatistics[j] + "x " + contestData.contest.objectives[j].name + "` ";
+            playerStatisticsString = playerStatisticsString + "`" + objectiveStatistics[j] + "x " + contestObjectives[j].name + "` ";
         }
         playerStatisticsString = playerStatisticsString + "\n";
     }
@@ -874,29 +1002,37 @@ function printRoundSheet(contestId, contestRound) {
 }
 
 function calculatePoints(contestId, attendeeId, contestRound) {
-    var contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+    // query objectives
+    SQL = "SELECT name, value FROM contest_objectives WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
-    // search for attendee
+    var contestObjectives = RECORDS;
+
+    // query entries
+    SQL = "SELECT round, objectiveName, objectiveValue FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ?";
+    DATABASE_DATA = [contestId, attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeEntries = RECORDS;
+
+    // calculate points for every entry
     var points = 0;
-    for (var i = 0; i < contestData.attendees.length; i++) {
-        if (contestData.attendees[i].id === attendeeId) {
+    for (var i = 0; i < contestAttendeeEntries.length; i++) {
 
-            // calculate points for every entry
-            for (var j = 0; j < contestData.attendees[i].entries.length; j++) {
+        // check for round
+        if (contestRound > 0 && contestAttendeeEntries[i].round !== contestRound) {
+            continue;
+        }
 
-                // check for round
-                if (contestRound > 0 && contestData.attendees[i].entries[j].round !== contestRound) {
-                    continue;
-                }
-
-                // multiply points by value of objective
-                for (var k = 0; k < contestData.attendees[i].entries[j].values.length; k++) {
-                    points = points + (contestData.attendees[i].entries[j].values[k].value * contestData.contest.objectives[k].value);
-                }
+        // multiply points by value of objective
+        for (var j = 0; j < contestObjectives.length; j++) {
+            if (contestAttendeeEntries[i].objectiveName === contestObjectives[j].name) {
+                points = points + (contestObjectives[j].value * contestAttendeeEntries[i].objectiveValue);
             }
         }
     }
+
     return points;
 }
 
@@ -915,20 +1051,126 @@ function sortAttendees(attendees) {
 }
 
 function checkFinished(contestId) {
-    var contestData = getContestData(contestId);
-    if (contestData === ERR_CONTEST_NOT_FOUND) return;
+    // query contests
+    SQL = "SELECT entryCount FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
 
     // no auto-finish in event mode
-    if (contestData.contest.entryCount == 0) {
+    if (contests[0].entryCount == 0) {
         return false;
     }
 
+    // query attendees
+    SQL = "SELECT attendeeId FROM contest_attendees WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendees = RECORDS;
+
+    // check finished
     var isFinished = true;
-    for (var i = 0; i < contestData.attendees.length; i++) {
-        if (contestData.attendees[i].entries.length < contestData.contest.entryCount) {
+    var contestAttendeeEntriesDistinct;
+    for (var i = 0; i < contestAttendees.length; i++) {
+        // query entries distinctly
+        SQL = "SELECT DISTINCT entryId FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ?";
+        DATABASE_DATA = [contestId, contestAttendees[i].attendeeId];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+    
+        contestAttendeeEntriesDistinct = RECORDS;
+
+        if (contestAttendeeEntriesDistinct.length < contests[0].entryCount) {
             isFinished = false;
         }
     }
 
     return isFinished;
+}
+
+function initializeDatabase() {
+    const sqlite3 = require('better-sqlite3');
+
+    // connect to database
+    const db = new sqlite3(DB_PATH);
+
+    // create table "contests"
+    SQL = `CREATE TABLE IF NOT EXISTS contests (
+        id INTEGER PRIMARY KEY,
+        contestId TEXT NOT NULL UNIQUE,
+        creationDate TEXT NOT NULL,
+        state TEXT NOT NULL,
+        authorId TEXT NOT NULL,
+        authorName TEXT NOT NULL,
+        entryCount INTEGER NOT NULL,
+        currentRound INTEGER NOT NULL,
+        maxRoundCount INTEGER NOT NULL,
+        rated INTEGER NOT NULL,
+        modtime TEXT NOT NULL)`;
+
+    db.prepare(SQL).run();
+
+    // create table "contest_objectives"
+    SQL = `CREATE TABLE IF NOT EXISTS contest_objectives (
+        id INTEGER PRIMARY KEY,
+        contestId TEXT NOT NULL,
+        name TEXT NOT NULL,
+        value REAL NOT NULL,
+        modtime TEXT NOT NULL)`;
+        
+    db.prepare(SQL).run();
+
+
+    // create table "contest_attendees"
+    SQL = `CREATE TABLE IF NOT EXISTS contest_attendees (
+        id INTEGER PRIMARY KEY,
+        contestId TEXT NOT NULL,
+        attendeeId TEXT NOT NULL,
+        name TEXT NOT NULL,
+        modtime TEXT NOT NULL)`;
+        
+    db.prepare(SQL).run();
+
+    // create table "contest_attendee_entries"
+    SQL = `CREATE TABLE IF NOT EXISTS contest_attendee_entries (
+        id INTEGER PRIMARY KEY,
+        contestId TEXT NOT NULL,
+        attendeeId TEXT NOT NULL,
+        entryId TEXT NOT NULL,
+        objectiveName TEXT NOT NULL,
+        objectiveValue REAL NOT NULL,
+        round INTEGER NOT NUll,
+        modtime TEXT NOT NULL)`;
+        
+    db.prepare(SQL).run();
+
+    db.close();
+}
+
+function writeDatabase(sql, databaseData) {
+    const sqlite3 = require('better-sqlite3');
+
+    // connect to database
+    const db = new sqlite3(DB_PATH);
+
+    db.prepare(sql).run(databaseData);
+    db.close();
+};
+
+
+function queryDatabase(sql, databaseData) {
+    const sqlite3 = require('better-sqlite3');
+
+    // connect to database
+    const db = new sqlite3(DB_PATH);
+
+    var records = db.prepare(sql).all(databaseData);
+    db.close();
+
+    return records;
+};
+
+function getModtime() {
+    return new Date().toJSON();
 }

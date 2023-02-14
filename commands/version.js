@@ -8,10 +8,11 @@ module.exports = {
 
         const embed = new MessageEmbed()
         .setTitle("📕 Version History")
-        .setDescription("Version `0.3.2`")
+        .setDescription("Version `0.4.0`")
         .setColor("#a844ff")
         .setTimestamp()
         .addFields(
+            {name: "> 0.4", value: "Added database `(0.4.0)`.", inline: false},
             {name: "> 0.3", value: "" +
                                    "Added round system (`0.3.2`). \n" +
                                    "Added personal statistics (`0.3.1`). \n" +
@@ -26,7 +27,7 @@ module.exports = {
                                    "Added `+fillSlots` argument `(0.2.1)`. \n" +
                                    "Added random loadout generator `(0.2.0)`.",
                                     inline: false},
-            {name: "> 0.1", value: "Added basic list functionality `(0.1.0)`.", inline: false},
+            {name: "> 0.1", value: "Added basic list functionality `(0.1.0)`.", inline: false}
         );
 
         message.channel.send({ embeds: [embed] });
