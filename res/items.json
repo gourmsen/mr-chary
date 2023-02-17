@@ -120,7 +120,7 @@
                 {
                     "name": "Springfield 1892 Krag",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 0,
+                    "bloodlineLevel": 62,
                     "variants": [
                         {
                             "name": "Normal",
@@ -252,7 +252,7 @@
                 {
                     "name": "Martini-Henry IC1 Ironside",
                     "ammoSlots": 1,
-                    "bloodlineLevel": 0,
+                    "bloodlineLevel": 9,
                     "variants": [
                         {
                             "name": "Normal",
