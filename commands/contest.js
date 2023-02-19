@@ -335,7 +335,7 @@ function listContests() {
         if (contests[i].entryCount > 0) {
             contestsString = contestsString + '🏅 ';
         } else {
-            contestsString = contestsString + '🎪 ';
+            contestsString = contestsString + '♾️ ';
         }
 
         // display contest state
@@ -425,7 +425,7 @@ function personalStats() {
         // calculate entry values
         entriesString = entriesString + '`' + contestAttendeeEntriesDistinct[i].entryId + '`: '
         for (var j = 0; j < contestAttendeeEntries.length; j++) {
-            entriesString = entriesString + '`' + contestAttendeeEntries[j].objectiveValue + 'x ' + contestAttendeeEntries[j].objectiveName + '` ';
+            entriesString = entriesString + '`' + contestAttendeeEntries[j].objectiveValue + '` ';
         }
 
         entriesString = entriesString + '\n';
@@ -769,22 +769,22 @@ function printContestSheet(contestId) {
     // display contest state
     switch(contests[0].state) {
         case STAT_OPEN:
-            embed.setTitle("Contest `[" + contestId + "]` • `[OPEN]`" + ratedString);
+            embed.setTitle("Contest `" + contestId + "` • `OPEN`" + ratedString);
             embed.setDescription("`!cry contest join " + contestId + '`');
             embed.setColor("#00ccff");
             break;
         case STAT_STARTED:
-            embed.setTitle("Contest `[" + contestId + "]` • `[STARTED]`" + ratedString);
+            embed.setTitle("Contest `" + contestId + "` • `STARTED`" + ratedString);
             embed.setDescription("`!cry contest add " + contestId + objectivesStringExample + '`');
             embed.setColor("#99ff99");
             break;
         case STAT_CLOSED:
-            embed.setTitle("Contest `[" + contestId + "]` • `[CLOSED]`" + ratedString);
+            embed.setTitle("Contest `" + contestId + "` • `CLOSED`" + ratedString);
             embed.setDescription("This contest is over");
             embed.setColor("#ff0000");
             break;
         default:
-            embed.setTitle("Contest `[" + contestId + "]` • `[UNDEFINED]`" + ratedString);
+            embed.setTitle("Contest `" + contestId + "` • `UNDEFINED`" + ratedString);
             embed.setDescription("");
             embed.setColor("#ffffff");
             break;
@@ -799,17 +799,18 @@ function printContestSheet(contestId) {
         });
     } else {
         embed.addFields({
-            name: "Event Mode 🎪",
+            name: "Unlimited Mode ♾️",
             value: "Unlimited entries per attendee",
             inline: false
         });
     }
 
     // display objectives
-    var objectivesString = "";
+    var objectivesString = '```';
     for (var i = 0; i < contestObjectives.length; i++) {
-        objectivesString = objectivesString + '`[' + (i + 1) + ']` ' + contestObjectives[i].name + ' (' + contestObjectives[i].value + ' Points)\n';
+        objectivesString = objectivesString + '[' + (i + 1) + '] ' + contestObjectives[i].name + ' (' + contestObjectives[i].value + 'P)\n';
     }
+    objectivesString = objectivesString + '```';
 
     embed.addFields({
         name: "Objectives 🎗️ ",
@@ -836,7 +837,7 @@ function printContestSheet(contestId) {
     // sort attendees
     var sortedAttendees = sortAttendees(attendees);
 
-    var podiumString = "";
+    var podiumString = '```';
     var place = 0;
     var position = 0;
     for (var i = 0; i < sortedAttendees.length; i++) {
@@ -875,21 +876,23 @@ function printContestSheet(contestId) {
                 break;
         }
 
-        podiumString = podiumString + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
+        podiumString = podiumString + sortedAttendees[i].name + '\n';
     }
+    podiumString = podiumString + '```';
 
     if (podiumString !== "") {
         embed.addFields({
-            name: "Podium 🔥",
+            name: "Podium 🏆",
             value: podiumString,
             inline: false
         });
     }
 
-    var attendeesString = "";
+    var attendeesString = '```';
     for (var i = 0; i < sortedAttendees.length; i++) {
-        attendeesString = attendeesString + '• ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
+        attendeesString = attendeesString + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ')\n';
     }
+    attendeesString = attendeesString + '```';
 
     if (attendeesString !== "") {
         embed.addFields({
@@ -952,10 +955,11 @@ function printRoundSheet(contestId, contestRound) {
 
     var sortedAttendees = sortAttendees(attendees);
 
-    var attendeesString = "";
+    var attendeesString = '```';
     for (var i = 0; i < sortedAttendees.length; i++) {
-        attendeesString = attendeesString + '• ' + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ' Points)\n';
+        attendeesString = attendeesString + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ')\n';
     }
+    attendeesString = attendeesString + '```';
 
     if (attendeesString !== "") {
         embed.addFields({
@@ -966,14 +970,16 @@ function printRoundSheet(contestId, contestRound) {
     }
 
     // prepare player statistics
-    var playerStatisticsString = "";
+    var playerStatisticsString = '```';
+
     var objectiveStatistics;
     var contestAttendeeEntries;
     for (var i = 0; i < contestAttendees.length; i++) {
-        playerStatisticsString = playerStatisticsString + "• " + contestAttendees[i].name + "\n";
         objectiveStatistics = new Array(contestObjectives.length).fill(Number(0));
 
         // go through all objectives
+        var playerStatisticsString = playerStatisticsString + contestAttendees[i].name + ' (';
+
         for (var j = 0; j < contestObjectives.length; j++) {
             // query entries
             SQL = "SELECT * FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ? AND objectiveName = ? AND round = ?";
@@ -987,10 +993,15 @@ function printRoundSheet(contestId, contestRound) {
             }
 
             // display objective values
-            playerStatisticsString = playerStatisticsString + "`" + objectiveStatistics[j] + "x " + contestObjectives[j].name + "` ";
+            playerStatisticsString = playerStatisticsString + objectiveStatistics[j];
+
+            if (j < contestObjectives.length - 1) {
+                playerStatisticsString = playerStatisticsString + " ";
+            }
         }
-        playerStatisticsString = playerStatisticsString + "\n";
+        playerStatisticsString = playerStatisticsString + ')\n';
     }
+    playerStatisticsString = playerStatisticsString + '```';
 
     embed.addFields({
         name: "Statistics 📈",
@@ -1058,7 +1069,7 @@ function checkFinished(contestId) {
 
     var contests = RECORDS;
 
-    // no auto-finish in event mode
+    // no auto-finish in unlimited mode
     if (contests[0].entryCount == 0) {
         return false;
     }
