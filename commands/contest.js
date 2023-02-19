@@ -27,6 +27,7 @@ const ERR_NOT_NUMERIC = 11;
 const ERR_NOT_ATTENDING = 12;
 const ERR_NOT_OPEN = 13;
 const ERR_ROUND_COUNT = 14;
+const ERR_ENTRY_NOT_FOUND = 15;
 
 module.exports = {
     name: 'contest',
@@ -51,6 +52,10 @@ module.exports = {
             case "a":
             case "add":
                 entryContest();
+                break;
+            case "u":
+            case "update":
+                updateEntry();
                 break;
 
             // information
@@ -477,12 +482,6 @@ function stateContest(state) {
         return ERR_SAME_STATE;
     }
 
-    // check closed
-    if (contests[0].state === 'Closed') {
-        MESSAGE.channel.send("What's dead should stay dead...");
-        return ERR_DEAD_CONTEST;
-    }
-
     // prepare contest data for table "contests"
     MODTIME = getModtime();
 
@@ -528,7 +527,7 @@ function roundContest() {
 
     var contests = RECORDS;
 
-    // author check
+    // check author
     if (contests[0].authorId !== MESSAGE.author.id) {
         MESSAGE.channel.send("Only the contest author can change the current round...");
         return ERR_ONLY_AUTHOR;
@@ -577,7 +576,7 @@ function entryContest() {
         return ERR_CONTEST_NOT_FOUND;
     }
 
-    // check, whether contest is in state started
+    // check, whether contest is in state started / closed
     switch (contests[0].state) {
         case STAT_OPEN:
             MESSAGE.channel.send("Contest `" + contestId + "` hasn't started, yet...");
@@ -646,8 +645,15 @@ function entryContest() {
 
     var contestObjectives = RECORDS;
 
+    // check for objectives
+    if (ARGS.length < 3) {
+        MESSAGE.channel.send("Enter at least one objective...");
+        return ERR_OBJECTIVE_MINIMUM;
+    }
+
     // check whether objective is in arguments and fill value
     var objectiveId, objectiveValue;
+    var objectiveValues = new Array(contestObjectives.length).fill(Number(0));
     for (var i = 0; i < contestObjectives.length; i++) {
         for (var j = 2; j < ARGS.length; j++) {
             objectiveId = parseInt(ARGS[j].substr(0, ARGS[j].indexOf('=')));
@@ -666,16 +672,18 @@ function entryContest() {
                     MESSAGE.channel.send("Value for objective `" + contestObjectives[i].name + "` couldn't be logged...");
                     console.info("Value for objective '" + contestObjectives[i].name + "' couldn't be logged by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')...');
 
-                    objectiveValue = 0;
+                    break;
                 }
 
+                objectiveValues[i] = objectiveValue;
+
                 break;
-            } else {
-                objectiveValue = 0;
             }
         }
+    }
 
-        // prepare contest data for table "contest_attendee_entries"
+    // prepare contest data for table "contest_attendee_entries"
+    for (var i = 0; i < objectiveValues.length; i++) {
         MODTIME = getModtime();
 
         SQL = `INSERT INTO contest_attendee_entries(
@@ -693,7 +701,7 @@ function entryContest() {
             attendeeId,
             entryId,
             contestObjectives[i].name,
-            objectiveValue,
+            objectiveValues[i],
             contests[0].currentRound,
             MODTIME];
 
@@ -1184,4 +1192,101 @@ function queryDatabase(sql, databaseData) {
 
 function getModtime() {
     return new Date().toJSON();
+}
+
+function updateEntry() {
+    var entryId = ARGS[1];
+
+    // query entries
+    SQL = "SELECT contestId, entryId, attendeeId FROM contest_attendee_entries WHERE entryId = ?";
+    DATABASE_DATA = [entryId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeEntries = RECORDS;
+
+    // check existing entry
+    if (!contestAttendeeEntries.length) {
+        MESSAGE.channel.send("Entry `" + entryId + "` does not exist...");
+        return ERR_ENTRY_NOT_FOUND;
+    }
+
+    // query contests
+    SQL = "SELECT contestId, state FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestAttendeeEntries[0].contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // check, whether contest is in state started / closed
+    switch (contests[0].state) {
+        case STAT_OPEN:
+            MESSAGE.channel.send("Contest `" + contests[0].contestId + "` hasn't started, yet...");
+            return ERR_NOT_STARTED;
+        case STAT_CLOSED:
+            MESSAGE.channel.send("Contest `" + contests[0].contestId + "` is already closed...");
+            return ERR_DEAD_CONTEST;
+        default:
+            break;
+    }
+
+    // query objectives
+    SQL = "SELECT name FROM contest_objectives WHERE contestId = ?";
+    DATABASE_DATA = [contests[0].contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestObjectives = RECORDS;
+
+    // check owner
+    if (contestAttendeeEntries[0].attendeeId !== MESSAGE.author.id) {
+        MESSAGE.channel.send("You're not the author of this entry...");
+        return ERR_ONLY_AUTHOR;
+    }
+
+    // check for objectives
+    if (ARGS.length < 3) {
+        MESSAGE.channel.send("Enter at least one objective...");
+        return ERR_OBJECTIVE_MINIMUM;
+    }
+
+    // check whether objective is in arguments and fill value
+    var objectiveId, objectiveValue;
+    for (var i = 0; i < contestObjectives.length; i++) {
+        for (var j = 2; j < ARGS.length; j++) {
+            objectiveId = parseInt(ARGS[j].substr(0, ARGS[j].indexOf('=')));
+
+            // check numeric
+            if (isNaN(objectiveId)) {
+                continue;
+            }
+
+            // fill objective value
+            if (objectiveId - 1 === i) {
+                objectiveValue = parseFloat(ARGS[j].split('=')[1]);
+
+                // check numeric
+                if (isNaN(objectiveValue)) {
+                    MESSAGE.channel.send("Value for objective `" + contestObjectives[i].name + "` couldn't be logged...");
+                    console.info("Value for objective '" + contestObjectives[i].name + "' couldn't be logged by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')...');
+
+                    break;
+                }
+
+                // prepare contest data for table "contest_attendee_entries"
+                MODTIME = getModtime();
+
+                SQL = `UPDATE contest_attendee_entries SET objectiveValue = ?, modtime = ? WHERE entryId = ? AND objectiveName = ?;`
+
+                DATABASE_DATA = [
+                    objectiveValue,
+                    MODTIME,
+                    entryId,
+                    contestObjectives[i].name];
+
+                writeDatabase(SQL, DATABASE_DATA);
+            }
+        }
+    }
+    
+    MESSAGE.channel.send("Your entry `" + entryId + "` has been updated!");
+    console.info(MESSAGE.author.username + ' (' + MESSAGE.author.id + ') ' + "has updated an entry '" + entryId + "' in contest '" + contests[0].contestId + "'!");
 }
