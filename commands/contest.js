@@ -814,15 +814,14 @@ function printContestSheet(contestId) {
     }
 
     // display objectives
-    var objectivesString = '```';
+    var objectivesString = "";
     for (var i = 0; i < contestObjectives.length; i++) {
         objectivesString = objectivesString + '[' + (i + 1) + '] ' + contestObjectives[i].name + ' (' + contestObjectives[i].value + 'P)\n';
     }
-    objectivesString = objectivesString + '```';
 
     embed.addFields({
         name: "Objectives 🎗️ ",
-        value: objectivesString,
+        value: '```' + objectivesString + '```',
         inline: false
     });
 
@@ -845,7 +844,7 @@ function printContestSheet(contestId) {
     // sort attendees
     var sortedAttendees = sortAttendees(attendees);
 
-    var podiumString = '```';
+    var podiumString = "";
     var place = 0;
     var position = 0;
     for (var i = 0; i < sortedAttendees.length; i++) {
@@ -886,26 +885,24 @@ function printContestSheet(contestId) {
 
         podiumString = podiumString + sortedAttendees[i].name + '\n';
     }
-    podiumString = podiumString + '```';
 
     if (podiumString !== "") {
         embed.addFields({
             name: "Podium 🏆",
-            value: podiumString,
+            value: '```' + podiumString + '```',
             inline: false
         });
     }
 
-    var attendeesString = '```';
+    var attendeesString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
         attendeesString = attendeesString + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ')\n';
     }
-    attendeesString = attendeesString + '```';
 
     if (attendeesString !== "") {
         embed.addFields({
             name: "Attendees 🤠",
-            value: attendeesString,
+            value: '```' + attendeesString + '```',
             inline: false
         });
     }
@@ -963,22 +960,21 @@ function printRoundSheet(contestId, contestRound) {
 
     var sortedAttendees = sortAttendees(attendees);
 
-    var attendeesString = '```';
+    var attendeesString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
         attendeesString = attendeesString + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ')\n';
     }
-    attendeesString = attendeesString + '```';
 
     if (attendeesString !== "") {
         embed.addFields({
             name: "Results 🎬",
-            value: attendeesString,
+            value: '```' + attendeesString + '```',
             inline: false
         });
     }
 
     // prepare player statistics
-    var playerStatisticsString = '```';
+    var playerStatisticsString = "";
 
     var objectiveStatistics;
     var contestAttendeeEntries;
@@ -1009,13 +1005,14 @@ function printRoundSheet(contestId, contestRound) {
         }
         playerStatisticsString = playerStatisticsString + ')\n';
     }
-    playerStatisticsString = playerStatisticsString + '```';
 
-    embed.addFields({
-        name: "Statistics 📈",
-        value: playerStatisticsString,
-        inline: false
-    });
+    if (playerStatisticsString !== "") {
+        embed.addFields({
+            name: "Statistics 📈",
+            value: '```' + playerStatisticsString + '```',
+            inline: false
+        });
+    }
 
     MESSAGE.channel.send({ embeds: [embed] });
 }

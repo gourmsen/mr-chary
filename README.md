@@ -18,4 +18,4 @@ All commands are invoked with `!cry [command] <argument>`
 | `help`   |                                                                                                 | Prints out a help                                                 |
 | `list`   | `-g\|--group`                                                                                   | Lists all items in the item collection e.g. `!cry list -g=Rifles` |
 | `random` | `-fs\|--fill-slots`, `-fm\|--force-melee`, `-fk\|--force-kit`, `-bl\|--bloodline-level=<value>` | Generates a random loadout e.g. `!cry random -fs -fm -fk -bl=20`  |
-| `contest`| `create`, `info`, `personal`, `join`, `start`, `round`, `end`, `add`, `list`                    | Manages the contest system                                        |
+| `contest`| `create`, `info`, `personal`, `join`, `start`, `round`, `end`, `add`, `list`, `update`          | Manages the contest system                                        |
