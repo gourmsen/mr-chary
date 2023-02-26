@@ -8,11 +8,12 @@ module.exports = {
 
         const embed = new MessageEmbed()
         .setTitle("📕 Version History")
-        .setDescription("Version `0.4.0`")
+        .setDescription("Version `0.4.2`")
         .setColor("#a844ff")
         .setTimestamp()
         .addFields(
             {name: "> 0.4", value: "" +
+                                   "Added teams `(0.4.2)`. \n" +
                                    "Added entry update `(0.4.1)`. \n" +
                                    "Added database `(0.4.0)`.", inline: false},
             {name: "> 0.3", value: "" +
