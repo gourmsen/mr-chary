@@ -863,15 +863,24 @@ function teamContest() {
     }
 
     if (ARGS.length < 3) {
-        MESSAGE.channel.send("Enter the team size...");
+        MESSAGE.channel.send("Enter the team sizes...");
         return ERR_TEAM_SIZE;
     }
 
-    // fill entry count
-    var contestTeamSize = parseInt(ARGS[2]);
-    if (isNaN(contestTeamSize)) {
-        MESSAGE.channel.send("Enter a numeric value for the team size...");
-        return ERR_NOT_NUMERIC;
+    var teamSizes = [];
+    var currentTeam = 0;
+    var overallTeamSize = 0;
+    for (var i = 2; i < ARGS.length; i++) {
+        // fill team sizes
+        teamSizes[currentTeam] = parseInt(ARGS[i]);
+        if (isNaN(teamSizes[currentTeam])) {
+            MESSAGE.channel.send("Enter a numeric value for the team size...");
+            return ERR_NOT_NUMERIC;
+        }
+
+        overallTeamSize = overallTeamSize + teamSizes[currentTeam];
+
+        currentTeam++;
     }
 
     // query attendees
@@ -882,8 +891,8 @@ function teamContest() {
     var contestAttendees = RECORDS;
 
     // check for team size
-    if (contestAttendees.length < contestTeamSize) {
-        MESSAGE.channel.send("Not enough attendees...");
+    if (contestAttendees.length !== overallTeamSize) {
+        MESSAGE.channel.send("Sum of teams doesn't match attendee count...");
         return ERR_TEAM_SIZE;
     }
 
@@ -910,7 +919,7 @@ function teamContest() {
     var teamId = 1;
     var currentAttendee = 1;
     for (var i = 0; i < draftedAttendees.length; i++) {
-        if (currentAttendee > contestTeamSize) {
+        if (currentAttendee > teamSizes[teamId - 1]) {
             currentAttendee = 1;
             teamId++;
         }

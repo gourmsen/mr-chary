@@ -56,7 +56,7 @@ function contestHelp() {
         {name: "`!cry contest end [contest_id]`",                                   value: "Close the contest (only when author of the contest).", inline: false},
         {name: "`!cry contest add [contest_id] <objective=value>:n`",               value: "Log an entry for the contest.", inline: false},
         {name: "`!cry contest update [entry_id] <objective=value>:n`",              value: "Update an entry of the contest.", inline: false},
-        {name: "`!cry contest team [contest_id] [team_size]`",                      value: "Generate teams for the current round.", inline: false},
+        {name: "`!cry contest team [contest_id] [team_size]:n`",                    value: "Generate teams for the current round.", inline: false},
         {name: "`!cry contest list`",                                               value: "List all contests.", inline: false}
     );
 
