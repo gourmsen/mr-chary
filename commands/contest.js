@@ -1205,7 +1205,7 @@ function printRoundSheet(contestId, contestRound) {
         embed.addFields({
             name: "Results 🎬",
             value: '```' + attendeesString + '```',
-            inline: false
+            inline: true
         });
     }
 
@@ -1241,7 +1241,7 @@ function printRoundSheet(contestId, contestRound) {
         embed.addFields({
             name: "Statistics 📈",
             value: '```' + playerStatisticsString + '```',
-            inline: false
+            inline: true
         });
     }
 
