@@ -541,7 +541,7 @@ function boardContest() {
 
         var contestAttendees = RECORDS;
 
-        playerStatisticsString = playerStatisticsString + contestAttendees[0].name.padEnd(15);
+        playerStatisticsString = playerStatisticsString + contestAttendees[0].name.padEnd(25);
 
         // query general statistics
         SQL = "SELECT place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ? ORDER BY place";
@@ -574,7 +574,54 @@ function boardContest() {
         embed.addFields({
             name: "Medals 🏅",
             value: '```' + playerStatisticsString + '```',
-            inline: true
+            inline: false
+        });
+    }
+
+    // overall top performers
+    var topPerformersString = "";
+
+    // average contest points
+    SQL = "SELECT attendeeId, avg(points) as averageContestPoints FROM contest_attendee_statistics WHERE round = 0 GROUP BY attendeeId ORDER BY averageContestPoints DESC";
+    DATABASE_DATA = [];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeStatisticsACP = RECORDS;
+
+    // query attendees
+    SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
+    DATABASE_DATA = [contestAttendeeStatisticsACP[0].attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendees = RECORDS;
+
+    averageContestPointsRounded = Math.round(contestAttendeeStatisticsACP[0].averageContestPoints * 100) / 100;
+
+    topPerformersString = topPerformersString + "Ø Points per Contest".padEnd(25) + contestAttendees[0].name.padEnd(15) + " (" + averageContestPointsRounded + ")\n";
+
+    // average round points
+    SQL = "SELECT attendeeId, avg(points) as averageRoundPoints FROM contest_attendee_statistics WHERE round > 0 GROUP BY attendeeId ORDER BY averageRoundPoints DESC";
+    DATABASE_DATA = [];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeStatisticsARP = RECORDS;
+
+    // query attendees
+    SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
+    DATABASE_DATA = [contestAttendeeStatisticsARP[0].attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendees = RECORDS;
+
+    averageRoundPointsRounded = Math.round(contestAttendeeStatisticsARP[0].averageRoundPoints * 100) / 100;
+
+    topPerformersString = topPerformersString + "Ø Points per Round".padEnd(25) + contestAttendees[0].name.padEnd(15) + " (" + averageRoundPointsRounded + ")\n";
+
+    if (topPerformersString !== "") {
+        embed.addFields({
+            name: "Top Performers 😎",
+            value: '```' + topPerformersString + '```',
+            inline: false
         });
     }
 
@@ -1173,7 +1220,7 @@ function printContestSheet(contestId) {
     // display objectives
     var objectivesString = "";
     for (var i = 0; i < contestObjectives.length; i++) {
-        objectivesString = objectivesString + '[' + (i + 1) + '] ' + contestObjectives[i].name + ' (' + contestObjectives[i].value + 'P)\n';
+        objectivesString = objectivesString + '[' + (i + 1) + '] ' + contestObjectives[i].name.padEnd(11) + ' (' + contestObjectives[i].value + 'P)\n';
     }
 
     embed.addFields({
@@ -1253,7 +1300,7 @@ function printContestSheet(contestId) {
 
     var attendeesString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
-        attendeesString = attendeesString + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ')\n';
+        attendeesString = attendeesString + sortedAttendees[i].name.padEnd(15) + ' (' + sortedAttendees[i].points + ')\n';
     }
 
     if (attendeesString !== "") {
@@ -1319,7 +1366,7 @@ function printRoundSheet(contestId, contestRound) {
 
     var attendeesString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
-        attendeesString = attendeesString + sortedAttendees[i].name + ' (' + sortedAttendees[i].points + ')\n';
+        attendeesString = attendeesString + sortedAttendees[i].name.padEnd(15) + ' (' + sortedAttendees[i].points + ')\n';
     }
 
     if (attendeesString !== "") {
