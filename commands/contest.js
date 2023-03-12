@@ -78,6 +78,11 @@ module.exports = {
             case "personal":
                 personalStats();
                 break;
+            
+            case "b":
+            case "board":
+                boardContest();
+                break;
 
             // states
             case "s":
@@ -460,6 +465,116 @@ function personalStats() {
             name: "Entries",
             value: entriesString,
             inline: false
+        });
+    }
+
+    MESSAGE.channel.send({ embeds: [embed] });
+}
+
+function boardContest() {
+    // create embed
+    const embed = new MessageEmbed()
+    .setDescription("")
+    .setTimestamp();
+
+    // display contest round
+    embed.setTitle("🎗️ Leaderboard");
+    embed.setDescription("");
+    embed.setColor("#eba434");
+
+    // query attendees distinct
+    SQL = "SELECT DISTINCT attendeeId FROM contest_attendee_statistics";
+    DATABASE_DATA = [];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeStatisticsDistinct = RECORDS;
+
+    // prepare attendees
+    var attendees = [];
+    var attendeePoints;
+    for (var i = 0; i < contestAttendeeStatisticsDistinct.length; i++) {
+        attendeePoints = 0;
+
+        // query general statistics
+        SQL = "SELECT place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ?";
+        DATABASE_DATA = [contestAttendeeStatisticsDistinct[i].attendeeId, 0];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var contestAttendeeStatistics = RECORDS;
+
+        // calculate overall place
+        for (var j = 0; j < contestAttendeeStatistics.length; j++) {
+            switch (contestAttendeeStatistics[j].place) {
+                case 1:
+                    attendeePoints = attendeePoints + 3;
+                    break;
+                case 2:
+                    attendeePoints = attendeePoints + 2;
+                    break;
+                case 3:
+                    attendeePoints = attendeePoints + 1;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        var attendeeData = {
+            "id": contestAttendeeStatisticsDistinct[i].attendeeId,
+            "points": attendeePoints
+        }
+
+        attendees.push(attendeeData);
+    }
+
+    // sort attendees
+    var sortedAttendees = sortAttendees(attendees);
+
+    // display attendees
+    var playerStatisticsString = "";
+    for (var i = 0; i < sortedAttendees.length; i++) {
+
+        // query attendees (last used name)
+        SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
+        DATABASE_DATA = [sortedAttendees[i].id];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var contestAttendees = RECORDS;
+
+        playerStatisticsString = playerStatisticsString + contestAttendees[0].name.padEnd(15);
+
+        // query general statistics
+        SQL = "SELECT place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ? ORDER BY place";
+        DATABASE_DATA = [sortedAttendees[i].id, 0];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var contestAttendeeStatistics = RECORDS;
+
+        // display medals
+        for (var j = 0; j < contestAttendeeStatistics.length; j++) {
+            switch (contestAttendeeStatistics[j].place) {
+                case 1:
+                    playerStatisticsString = playerStatisticsString + '🥇';
+                    break;
+                case 2:
+                    playerStatisticsString = playerStatisticsString + '🥈';
+                    break;
+                case 3:
+                    playerStatisticsString = playerStatisticsString + '🥉';
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        playerStatisticsString = playerStatisticsString + "\n";
+    }
+    
+    if (playerStatisticsString !== "") {
+        embed.addFields({
+            name: "Medals 🏅",
+            value: '```' + playerStatisticsString + '```',
+            inline: true
         });
     }
 
