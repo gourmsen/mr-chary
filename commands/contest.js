@@ -1,5 +1,6 @@
 const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
 const { version } = require("os");
+const config = require("../config.json");
 require('better-logging')(console);
 
 var MESSAGE, ARGS;
@@ -92,6 +93,11 @@ module.exports = {
                 stateContest(STAT_CLOSED);
                 break;
             default:
+                break;
+
+            // developer
+            case "refresh":
+                if (config.developers.includes(MESSAGE.author.id)) refreshStatistics(ARGS[1]);
                 break;
         }
     }
@@ -1369,6 +1375,200 @@ function checkFinished(contestId) {
     return isFinished;
 }
 
+function refreshStatistics(contestId) {
+    // query contests
+    if (contestId) {
+        SQL = "SELECT contestId, state, currentRound FROM contests WHERE contestId = ?";
+        DATABASE_DATA = [contestId];
+    } else {
+        SQL = "SELECT contestId, state, currentRound FROM contests";
+        DATABASE_DATA = [];
+    }
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // check for no contests
+    if (!contests.length) {
+        if (contestId) {
+            MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
+            return ERR_CONTEST_NOT_FOUND;
+        } else {
+            MESSAGE.channel.send("There are no contests...");
+            return ERR_NO_CONTESTS;
+        }
+    }
+    
+    // truncate general statistics table
+    if (contestId) {
+        SQL = "DELETE FROM contest_attendee_statistics WHERE contestId = ?";
+        DATABASE_DATA = [contestId];
+    } else {
+        SQL = "DELETE FROM contest_attendee_statistics";
+        DATABASE_DATA = [];
+    }
+    writeDatabase(SQL, DATABASE_DATA);
+
+    // truncate objective statistics table
+    if (contestId) {
+        SQL = "DELETE FROM contest_attendee_objective_statistics WHERE contestId = ?";
+        DATABASE_DATA = [contestId];
+    } else {
+        SQL = "DELETE FROM contest_attendee_objective_statistics";
+        DATABASE_DATA = [];
+    }
+    writeDatabase(SQL, DATABASE_DATA);
+
+    // refresh general statistics
+    for (var i = 0; i < contests.length; i++) {
+        // check, whether contest hasn't been closed, yet
+        if (contests[i].state !== STAT_CLOSED) {
+            if (contestId) {
+                MESSAGE.channel.send("Contest `" + contestId + "` hasn't been closed, yet...");
+                return;
+            } else {
+                console.info("Skipping statistics for contest '" + contests[i].contestId + "' since it's not closed...");
+                continue;
+            }
+        }
+
+        // query attendees
+        SQL = "SELECT attendeeId FROM contest_attendees WHERE contestId = ?";
+        DATABASE_DATA = [contests[i].contestId];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var contestAttendees = RECORDS;
+
+        // check, whether contest has no attendees
+        if (!contestAttendees.length) {
+            if (contestId) {
+                MESSAGE.channel.send("Contest `" + contestId + "` has no attendees...");
+                return;
+            } else {
+                console.info("Skipping statistics for contest '" + contests[i].contestId + "' since it has no attendees...");
+                continue;
+            }
+        }
+
+        // query objectives
+        SQL = "SELECT name, value FROM contest_objectives WHERE contestId = ?";
+        DATABASE_DATA = [contests[i].contestId];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var contestObjectives = RECORDS;
+
+        // calculate points and places for every round
+        for (var j = 0; j <= contests[i].currentRound; j++) {
+            // prepare attendees
+            var attendees = [];
+            var attendeePoints, attendeePointsRounded;
+            for (var k = 0; k < contestAttendees.length; k++) {
+                // calculate points
+                attendeePoints = calculatePoints(contests[i].contestId, contestAttendees[k].attendeeId, j);
+                attendeePointsRounded = Math.round(attendeePoints * 100) / 100;
+
+                var attendeeData = {
+                    "id": contestAttendees[k].attendeeId,
+                    "points": attendeePointsRounded
+                }
+
+                attendees.push(attendeeData);
+            }
+
+            // sort attendees
+            var sortedAttendees = sortAttendees(attendees);
+
+            var place = 0;
+            var position = 0;
+            for (var k = 0; k < sortedAttendees.length; k++) {
+        
+                // check for same place
+                if (k > 0) {
+                    position++;
+        
+                    if (sortedAttendees[k - 1].points > sortedAttendees[k].points) {
+                        place = position;
+                    }
+                }
+
+                // prepare contest data for table "contests_attendee_statistics"
+                MODTIME = getModtime();
+
+                SQL = `INSERT INTO contest_attendee_statistics(
+                    contestId,
+                    attendeeId,
+                    round,
+                    points,
+                    place,
+                    modtime
+                    ) VALUES (?, ?, ?, ?, ?, ?)`;
+
+                DATABASE_DATA = [
+                    contests[i].contestId,
+                    sortedAttendees[k].id,
+                    j,
+                    sortedAttendees[k].points,
+                    place + 1,
+                    MODTIME
+                ];
+
+                writeDatabase(SQL, DATABASE_DATA);
+
+                // refresh objective statistics
+                for (var l = 0; l < contestObjectives.length; l++) {
+                    // query entries (sum of objectives)
+                    if (j > 0) {
+                        SQL = "SELECT sum(objectiveValue) AS objectiveSum FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ? AND round = ? AND objectiveName = ?";
+                        DATABASE_DATA = [contests[i].contestId, sortedAttendees[k].id, j, contestObjectives[l].name];
+                    } else {
+                        SQL = "SELECT sum(objectiveValue) AS objectiveSum FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ? AND objectiveName = ?";
+                        DATABASE_DATA = [contests[i].contestId, sortedAttendees[k].id, contestObjectives[l].name];
+                    }
+                    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+                    var contestAttendeeEntriesSum = RECORDS;
+                    
+                    // check for no entries in that round
+                    var objectiveSum = 0;
+                    if (contestAttendeeEntriesSum[0].objectiveSum) {
+                        objectiveSum = contestAttendeeEntriesSum[0].objectiveSum;
+                    }
+
+                    // prepare contest data for table "contests_attendee_objective_statistics"
+                    MODTIME = getModtime();
+
+                    SQL = `INSERT INTO contest_attendee_objective_statistics(
+                        contestId,
+                        attendeeId,
+                        round,
+                        objectiveName,
+                        objectiveValue,
+                        modtime
+                        ) VALUES (?, ?, ?, ?, ?, ?)`;
+
+                    DATABASE_DATA = [
+                        contests[i].contestId,
+                        sortedAttendees[k].id,
+                        j,
+                        contestObjectives[l].name,
+                        objectiveSum,
+                        MODTIME
+                    ];
+
+                    writeDatabase(SQL, DATABASE_DATA);
+                }
+            }
+        }
+        console.info("Statistics of contest '" + contests[i].contestId + "' have been refreshed!");
+    }
+
+    if (contestId) {
+        MESSAGE.channel.send("Statistics of contest `" + contestId + "` have been refreshed!");
+    } else {
+        MESSAGE.channel.send("All statistics have been refreshed!");
+    }
+}
+
 function initializeDatabase() {
     const sqlite3 = require('better-sqlite3');
 
@@ -1431,6 +1631,30 @@ function initializeDatabase() {
         attendeeId TEXT NOT NULL,
         teamId INTEGER NOT NULL,
         round INTEGER NOT NULL,
+        modtime TEXT NOT NULL)`;
+        
+    db.prepare(SQL).run();
+
+    // create table "contest_attendee_statistics"
+    SQL = `CREATE TABLE IF NOT EXISTS contest_attendee_statistics (
+        id INTEGER PRIMARY KEY,
+        contestId TEXT NOT NULL,
+        attendeeId TEXT NOT NULL,
+        round INTEGER NOT NULL,
+        points INTEGER NOT NULL,
+        place INTEGER NOT NULL,
+        modtime TEXT NOT NULL)`;
+        
+    db.prepare(SQL).run();
+
+    // create table "contest_attendee_objective_statistics"
+    SQL = `CREATE TABLE IF NOT EXISTS contest_attendee_objective_statistics (
+        id INTEGER PRIMARY KEY,
+        contestId TEXT NOT NULL,
+        attendeeId TEXT NOT NULL,
+        round INTEGER NOT NULL,
+        objectiveName TEXT NOT NULL,
+        objectiveValue REAL NOT NULL,
         modtime TEXT NOT NULL)`;
         
     db.prepare(SQL).run();
