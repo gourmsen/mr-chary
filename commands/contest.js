@@ -606,17 +606,32 @@ function boardContest() {
 
     var contestAttendeeStatisticsACP = RECORDS;
 
-    // query attendees
-    SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-    DATABASE_DATA = [contestAttendeeStatisticsACP[0].attendeeId];
-    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+    topPerformersString = topPerformersString + "Ø Points per Contest".padEnd(25);
+    for (var i = 0; i < 3; i++) {
+        // query attendees
+        SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
+        DATABASE_DATA = [contestAttendeeStatisticsACP[i].attendeeId];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
-    var contestAttendees = RECORDS;
+        var contestAttendees = RECORDS;
 
-    var averageContestPointsRounded = Math.round(contestAttendeeStatisticsACP[0].averageContestPoints * 100) / 100;
+        var averageContestPointsRounded = Math.round(contestAttendeeStatisticsACP[i].averageContestPoints * 100) / 100;
 
-    topPerformersString = topPerformersString + "Ø Points per Contest".padEnd(25) + contestAttendees[0].name.padEnd(15) + " (" + averageContestPointsRounded + ")\n";
+        switch (i) {
+            case 0:
+                topPerformersString = topPerformersString + "🥇 " + contestAttendees[i].name.padEnd(15) + " (" + averageContestPointsRounded + ")\n";
+                break;
+            case 1:
+                topPerformersString = topPerformersString + "".padEnd(25) + "🥈 " + contestAttendees[i].name.padEnd(15) + " (" + averageContestPointsRounded + ")\n";
+                break;
+            case 2:
+                topPerformersString = topPerformersString + "".padEnd(25) + "🥉 " + contestAttendees[i].name.padEnd(15) + " (" + averageContestPointsRounded + ")\n";
+                break;
+        }
+    }
 
+    topPerformersString = topPerformersString + "\n"
+    
     // average round points
     SQL = "SELECT attendeeId, avg(points) as averageRoundPoints FROM contest_attendee_statistics WHERE round > ? GROUP BY attendeeId ORDER BY averageRoundPoints DESC";
     DATABASE_DATA = [0];
@@ -624,16 +639,29 @@ function boardContest() {
 
     var contestAttendeeStatisticsARP = RECORDS;
 
-    // query attendees
-    SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-    DATABASE_DATA = [contestAttendeeStatisticsARP[0].attendeeId];
-    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+    topPerformersString = topPerformersString + "Ø Points per Round".padEnd(25);
+    for (var i = 0; i < 3; i++) {
+        // query attendees
+        SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
+        DATABASE_DATA = [contestAttendeeStatisticsARP[i].attendeeId];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
-    var contestAttendees = RECORDS;
+        var contestAttendees = RECORDS;
 
-    var averageRoundPointsRounded = Math.round(contestAttendeeStatisticsARP[0].averageRoundPoints * 100) / 100;
+        var averageRoundPointsRounded = Math.round(contestAttendeeStatisticsARP[i].averageRoundPoints * 100) / 100;
 
-    topPerformersString = topPerformersString + "Ø Points per Round".padEnd(25) + contestAttendees[0].name.padEnd(15) + " (" + averageRoundPointsRounded + ")\n";
+        switch (i) {
+            case 0:
+                topPerformersString = topPerformersString + "🥇 " + contestAttendees[i].name.padEnd(15) + " (" + averageRoundPointsRounded + ")\n";
+                break;
+            case 1:
+                topPerformersString = topPerformersString + "".padEnd(25) + "🥈 " + contestAttendees[i].name.padEnd(15) + " (" + averageRoundPointsRounded + ")\n";
+                break;
+            case 2:
+                topPerformersString = topPerformersString + "".padEnd(25) + "🥉 " + contestAttendees[i].name.padEnd(15) + " (" + averageRoundPointsRounded + ")\n";
+                break;
+        }
+    }
 
     if (topPerformersString !== "") {
         embed.addFields({
@@ -703,6 +731,7 @@ function stateContest(state) {
             }
 
             printContestSheet(contestId);
+            refreshStatistics(contestId);
             break;
         default:
             break;
