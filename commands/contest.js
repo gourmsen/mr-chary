@@ -407,7 +407,7 @@ function personalStats() {
     // display contest round
     embed.setTitle("🤠 Personal Statistics");
     embed.setDescription("");
-    embed.setColor("#03fcf4");
+    embed.setColor("#9403fc");
 
     // query general statistics
     SQL = "SELECT contestId, points, place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ? ORDER BY place";
