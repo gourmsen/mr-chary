@@ -34,7 +34,7 @@ function defaultHelp() {
         {name: "`!cry help`", value: "Prints this help.", inline: false},
         {name: "`!cry list (-g|--group=<name>)`", value: "Lists all available items.", inline: false},
         {name: "`!cry random (-fs|--fill-slots) (-fm|--force-melee) (-fk|--force-kit) (-bl|--bloodline-level=<value>)`", value: "Generates a random loadout.", inline: false},
-        {name: "`!cry contest (create|info|personal|join|start|round|end|add|list|update|team)`", value: "Manages the contest.", inline: false}
+        {name: "`!cry contest (create|info|personal|board|join|start|round|end|add|list|update|team)`", value: "Manages the contest.", inline: false}
     );
 
     MESSAGE.channel.send({ embeds: [embed] });

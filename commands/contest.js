@@ -31,6 +31,7 @@ const ERR_NOT_OPEN = 13;
 const ERR_ROUND_COUNT = 14;
 const ERR_ENTRY_NOT_FOUND = 15;
 const ERR_TEAM_SIZE = 16;
+const ERR_NO_STATS = 17;
 
 module.exports = {
     name: 'contest',
@@ -396,74 +397,86 @@ function listContests() {
 }
 
 function personalStats() {
-    var contestId = ARGS[1];
-
-    // query contests
-    SQL = "SELECT * FROM contests WHERE contestId = ?";
-    DATABASE_DATA = [contestId];
-    RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-    var contests = RECORDS;
-
-    // check existing contest
-    if (!contests.length) {
-        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
-        return ERR_CONTEST_NOT_FOUND;
-    }
-
     var attendeeId = MESSAGE.author.id;
 
-    // query attendees
-    SQL = "SELECT * FROM contest_attendees WHERE contestId = ? AND attendeeId = ?";
-    DATABASE_DATA = [contestId, attendeeId];
-    RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-    var contestAttendees = RECORDS;
-
-    // check for attendance
-    if (!contestAttendees.length) {
-        MESSAGE.channel.send("You're not attending this contest...");
-        return ERR_NOT_ATTENDING;
-    }
-
-    // query entries distinctly
-    SQL = "SELECT DISTINCT entryId FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ? ORDER BY modtime ASC";
-    DATABASE_DATA = [contestId, attendeeId];
-    RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-    var contestAttendeeEntriesDistinct = RECORDS;
-
-    // display entry values
-    var entriesString = "";
-    var contestAttendeeEntries;
-    for (var i = 0; i < contestAttendeeEntriesDistinct.length; i++) {
-        // query entries
-        SQL = "SELECT objectiveName, objectiveValue FROM contest_attendee_entries WHERE entryId = ? ORDER BY modtime ASC";
-        DATABASE_DATA = [contestAttendeeEntriesDistinct[i].entryId];
-        RECORDS = queryDatabase(SQL, DATABASE_DATA);
-    
-        contestAttendeeEntries = RECORDS;
-
-        // calculate entry values
-        entriesString = entriesString + '`' + contestAttendeeEntriesDistinct[i].entryId + '`: '
-        for (var j = 0; j < contestAttendeeEntries.length; j++) {
-            entriesString = entriesString + '`' + contestAttendeeEntries[j].objectiveValue + '` ';
-        }
-
-        entriesString = entriesString + '\n';
-    }
-
-    // show embed
+    // create embed
     const embed = new MessageEmbed()
-    .setTitle("🤠 Personal Statistics")
-    .setDescription("Logged for contest `" + contestId + '`')
-    .setColor("#6666ff")
+    .setDescription("")
     .setTimestamp();
 
-    if (entriesString) {
+    // display contest round
+    embed.setTitle("🤠 Personal Statistics");
+    embed.setDescription("");
+    embed.setColor("#03fcf4");
+
+    // query general statistics
+    SQL = "SELECT contestId, points, place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ? ORDER BY place";
+    DATABASE_DATA = [attendeeId, 0];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeStatistics = RECORDS;
+
+    // check for statistics
+    if (!contestAttendeeStatistics.length) {
+        MESSAGE.channel.send("There are no statistics logged for you, yet...");
+        return ERR_NO_STATS;
+    }
+
+    // display medals
+    var medalsString = "";
+    for (var i = 0; i < contestAttendeeStatistics.length; i++) {
+        switch (contestAttendeeStatistics[i].place) {
+            case 1:
+                medalsString = medalsString + '🥇 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].points + ")\n";
+                break;
+            case 2:
+                medalsString = medalsString + '🥈 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].points + ")\n";
+                break;
+            case 3:
+                medalsString = medalsString + '🥉 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].points + ")\n";
+                break;
+            default:
+                break;
+        }
+    }
+    
+    if (medalsString !== "") {
         embed.addFields({
-            name: "Entries",
-            value: entriesString,
+            name: "Medals 🏅",
+            value: '```' + medalsString + '```',
+            inline: false
+        });
+    }
+
+    // display performance
+    var performanceString = "";
+
+    // average contest points
+    SQL = "SELECT avg(points) as averageContestPoints FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ?";
+    DATABASE_DATA = [attendeeId, 0];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeStatisticsACP = RECORDS;
+
+    var averageContestPointsRounded = Math.round(contestAttendeeStatisticsACP[0].averageContestPoints * 100) / 100;
+
+    performanceString = performanceString + "Ø Points per Contest".padEnd(25) + averageContestPointsRounded + "\n";
+
+    // average round points
+    SQL = "SELECT avg(points) as averageRoundPoints FROM contest_attendee_statistics WHERE attendeeId = ? AND round > ?";
+    DATABASE_DATA = [attendeeId, 0];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeStatisticsARP = RECORDS;
+
+    var averageRoundPointsRounded = Math.round(contestAttendeeStatisticsARP[0].averageRoundPoints * 100) / 100;
+
+    performanceString = performanceString + "Ø Points per Round".padEnd(25) + averageRoundPointsRounded + "\n";
+
+    if (performanceString !== "") {
+        embed.addFields({
+            name: "Performance 🏹",
+            value: '```' + performanceString + '```',
             inline: false
         });
     }
@@ -477,7 +490,6 @@ function boardContest() {
     .setDescription("")
     .setTimestamp();
 
-    // display contest round
     embed.setTitle("🎗️ Leaderboard");
     embed.setDescription("");
     embed.setColor("#eba434");
@@ -488,6 +500,12 @@ function boardContest() {
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
     var contestAttendeeStatisticsDistinct = RECORDS;
+
+    // check for statistics
+    if (!contestAttendeeStatisticsDistinct.length) {
+        MESSAGE.channel.send("There are no statistics logged, yet...");
+        return ERR_NO_STATS;
+    }
 
     // prepare attendees
     var attendees = [];
@@ -534,7 +552,7 @@ function boardContest() {
     var playerStatisticsString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
 
-        // query attendees (last used name)
+        // query attendees
         SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
         DATABASE_DATA = [sortedAttendees[i].id];
         RECORDS = queryDatabase(SQL, DATABASE_DATA);
@@ -582,8 +600,8 @@ function boardContest() {
     var topPerformersString = "";
 
     // average contest points
-    SQL = "SELECT attendeeId, avg(points) as averageContestPoints FROM contest_attendee_statistics WHERE round = 0 GROUP BY attendeeId ORDER BY averageContestPoints DESC";
-    DATABASE_DATA = [];
+    SQL = "SELECT attendeeId, avg(points) as averageContestPoints FROM contest_attendee_statistics WHERE round = ? GROUP BY attendeeId ORDER BY averageContestPoints DESC";
+    DATABASE_DATA = [0];
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
     var contestAttendeeStatisticsACP = RECORDS;
@@ -595,13 +613,13 @@ function boardContest() {
 
     var contestAttendees = RECORDS;
 
-    averageContestPointsRounded = Math.round(contestAttendeeStatisticsACP[0].averageContestPoints * 100) / 100;
+    var averageContestPointsRounded = Math.round(contestAttendeeStatisticsACP[0].averageContestPoints * 100) / 100;
 
     topPerformersString = topPerformersString + "Ø Points per Contest".padEnd(25) + contestAttendees[0].name.padEnd(15) + " (" + averageContestPointsRounded + ")\n";
 
     // average round points
-    SQL = "SELECT attendeeId, avg(points) as averageRoundPoints FROM contest_attendee_statistics WHERE round > 0 GROUP BY attendeeId ORDER BY averageRoundPoints DESC";
-    DATABASE_DATA = [];
+    SQL = "SELECT attendeeId, avg(points) as averageRoundPoints FROM contest_attendee_statistics WHERE round > ? GROUP BY attendeeId ORDER BY averageRoundPoints DESC";
+    DATABASE_DATA = [0];
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
     var contestAttendeeStatisticsARP = RECORDS;
@@ -613,7 +631,7 @@ function boardContest() {
 
     var contestAttendees = RECORDS;
 
-    averageRoundPointsRounded = Math.round(contestAttendeeStatisticsARP[0].averageRoundPoints * 100) / 100;
+    var averageRoundPointsRounded = Math.round(contestAttendeeStatisticsARP[0].averageRoundPoints * 100) / 100;
 
     topPerformersString = topPerformersString + "Ø Points per Round".padEnd(25) + contestAttendees[0].name.padEnd(15) + " (" + averageRoundPointsRounded + ")\n";
 
