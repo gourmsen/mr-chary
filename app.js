@@ -10,8 +10,9 @@ const config = require("./config.json");
 // read command files
 client.commands = new Collection();
 
+// set client commands
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
-for(let file of commandFiles) {
+for (let file of commandFiles) {
     let command = require(`./commands/${file}`);
 
     client.commands.set(command.name, command);
@@ -24,7 +25,7 @@ client.once('ready', () => {
 
 // command handler
 client.on('messageCreate', message => {
-    if(!message.content.startsWith(config.prefix) || message.author.bot) {
+    if (!message.content.startsWith(config.prefix) || message.author.bot) {
         return;
     }
 

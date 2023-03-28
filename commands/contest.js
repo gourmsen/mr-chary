@@ -1,4 +1,4 @@
-const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 const { version } = require("os");
 const config = require("../config.json");
 require('better-logging')(console);
@@ -49,9 +49,16 @@ module.exports = {
             case "create":
                 createContest();
                 break;
+            case "d":
+            case "delete":
+                deleteContest();
+                break;
             case "j":
             case "join":
                 joinContest();
+                break;
+            case "leave":
+                leaveContest();
                 break;
             case "a":
             case "add":
@@ -250,6 +257,67 @@ function createContest() {
     printContestSheet(contestId);
 }
 
+function deleteContest() {
+    var contestId = ARGS[1];
+
+    // query contests
+    SQL = "SELECT contestId, authorId FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // check existing contest
+    if (!contests.length) {
+        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
+        return ERR_CONTEST_NOT_FOUND;
+    }
+
+    // check author
+    if (contests[0].authorId !== MESSAGE.author.id) {
+        MESSAGE.channel.send("Only the contest author can delete the contest...");
+        return ERR_ONLY_AUTHOR;
+    }
+
+    // truncate contests table
+    SQL = "DELETE FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    writeDatabase(SQL, DATABASE_DATA);
+
+    // truncate contest_objectives table
+    SQL = "DELETE FROM contest_objectives WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    writeDatabase(SQL, DATABASE_DATA);
+
+    // truncate contest_attendees table
+    SQL = "DELETE FROM contest_attendees WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    writeDatabase(SQL, DATABASE_DATA);
+
+    // truncate contest_attendee_entries table
+    SQL = "DELETE FROM contest_attendee_entries WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    writeDatabase(SQL, DATABASE_DATA);
+
+    // truncate contest_attendee_teams table
+    SQL = "DELETE FROM contest_attendee_teams WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    writeDatabase(SQL, DATABASE_DATA);
+
+    // truncate contest_attendee_statistics table
+    SQL = "DELETE FROM contest_attendee_statistics WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    writeDatabase(SQL, DATABASE_DATA);
+
+    // truncate contest_attendee_objective_statistics table
+    SQL = "DELETE FROM contest_attendee_objective_statistics WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    writeDatabase(SQL, DATABASE_DATA);
+
+    MESSAGE.channel.send("Contest `" + contestId + "` has been deleted!");
+    console.info(MESSAGE.author.username + ' (' + MESSAGE.author.id + ') ' + "has deleted contest '" + contestId + "'!");
+}
+
 function joinContest() {
     var contestId = ARGS[1];
 
@@ -306,8 +374,55 @@ function joinContest() {
 
     writeDatabase(SQL, DATABASE_DATA);
 
-    MESSAGE.channel.send("You're now competing in this contest!");
+    MESSAGE.channel.send("You're now competing in contest `" + contestId + "`!");
     console.info(attendeeName + ' (' + attendeeId + ') ' + "has joined contest '" + contestId + "'!");
+}
+
+function leaveContest() {
+    var contestId = ARGS[1];
+
+    // query contests
+    SQL = "SELECT contestId, state FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // check existing contest
+    if (!contests.length) {
+        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
+        return ERR_CONTEST_NOT_FOUND;
+    }
+
+    // only leavable, when in open state
+    if (contests[0].state !== STAT_OPEN) {
+        MESSAGE.channel.send("Contest has already started/ended...");
+        return ERR_NOT_OPEN;
+    }
+
+    var attendeeId = MESSAGE.author.id;
+    var attendeeName = MESSAGE.author.username;
+
+    // query attendees
+    SQL = "SELECT attendeeId FROM contest_attendees WHERE contestId = ? AND attendeeId = ?";
+    DATABASE_DATA = [contestId, attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendees = RECORDS;
+
+    // check for attendence
+    if (!contestAttendees.length) {
+        MESSAGE.channel.send("You haven't joined this contest...");
+        return ERR_ALREADY_JOINED;
+    }
+
+    // truncate contest_attendees table
+    SQL = "DELETE FROM contest_attendees WHERE contestId = ? AND attendeeId = ?";
+    DATABASE_DATA = [contestId, attendeeId];
+    writeDatabase(SQL, DATABASE_DATA);
+
+    MESSAGE.channel.send("You've left contest `" + contestId + "`!");
+    console.info(attendeeName + ' (' + attendeeId + ') ' + "has left contest '" + contestId + "'!");
 }
 
 function infoContest() {

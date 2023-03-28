@@ -1,4 +1,4 @@
-const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 require('better-logging')(console);
 
 module.exports = {
@@ -13,6 +13,7 @@ module.exports = {
         .setTimestamp()
         .addFields(
             {name: "> 0.4", value: "" +
+                                   "Added delete/leave `(0.4.4)`. \n" +
                                    "Added leaderboard `(0.4.3)`. \n" +
                                    "Added teams `(0.4.2)`. \n" +
                                    "Added entry update `(0.4.1)`. \n" +
