@@ -152,6 +152,8 @@ function createContest() {
     var contestCurrentRound = 1;
     var contestEntryCount = 0;
     var contestMaxRoundCount = 0;
+    var contestRated = 0;
+    var contestType = "";
 
     // check for objectives
     if (ARGS.length < 2) {
@@ -214,8 +216,9 @@ function createContest() {
         currentRound,
         maxRoundCount,
         rated,
+        type,
         modtime
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     DATABASE_DATA = [
         contestId,
@@ -226,7 +229,8 @@ function createContest() {
         contestEntryCount,
         contestCurrentRound,
         contestMaxRoundCount,
-        0,
+        contestRated,
+        contestType,
         MODTIME];
 
     writeDatabase(SQL, DATABASE_DATA);
@@ -433,6 +437,14 @@ function optionsContest() {
                 DATABASE_DATA = [contestId, argValue];
                 writeDatabase(SQL, DATABASE_DATA);
                 break;
+            case "-ty":
+            case "--type":
+                    // prepare contest data for table "contests"
+                    MODTIME = getModtime();
+                    SQL = "UPDATE contests SET type = ?, modtime = ? WHERE contestId = ?";
+                    DATABASE_DATA = [argValue, MODTIME, contestId];
+                    writeDatabase(SQL, DATABASE_DATA);
+                    break;
             default:
                 break;
         }
@@ -577,7 +589,7 @@ function infoContest() {
 
 function listContests() {
     // query contests
-    SQL = "SELECT contestId, entryCount, state, authorName, creationDate FROM contests";
+    SQL = "SELECT contestId, entryCount, state, authorName, creationDate, type FROM contests";
     DATABASE_DATA = [];
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
@@ -595,13 +607,6 @@ function listContests() {
         // prepare contest string for this contest
         contestsString = contestsString + '• `';
 
-        // display entry count (mode)
-        if (contests[i].entryCount > 0) {
-            contestsString = contestsString + '🏅 ';
-        } else {
-            contestsString = contestsString + '♾️ ';
-        }
-
         // display contest state
         switch(contests[i].state) {
             case STAT_OPEN:
@@ -618,7 +623,13 @@ function listContests() {
                 break;
         }
 
-        contestsString = contestsString + contests[i].contestId + " (Author: " + contests[i].authorName + ") - (Created: " + contests[i].creationDate.substr(0, 10) + ")`\n";
+        contestsString = contestsString + contests[i].contestId + " (" + contests[i].creationDate.substr(0, 10) + ") - (" + contests[i].authorName + ")";
+        
+        if (contests[i].type) {
+            contestsString = contestsString + " - (" + contests[i].type + ")`\n";
+        } else {
+            contestsString = contestsString + "`\n"
+        }
     }
 
     // show embed
@@ -657,6 +668,41 @@ function personalStats() {
 
     var contestAttendeeStatistics = RECORDS;
 
+    // personal statistics options
+    var argName, argValue;
+    var argumentContestId, argumentType;
+    for (var i = 1; i < ARGS.length; i++) {
+
+        argName = ARGS[i].substr(0, ARGS[i].indexOf('='));
+        argValue = ARGS[i].split('=')[1];
+
+        switch (argName) {
+            case "-id":
+            case "--contest-id":
+                // query contests
+                SQL = "SELECT contestId FROM contests WHERE contestId = ?";
+                DATABASE_DATA = [argValue];
+                RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+                var contests = RECORDS;
+
+                // check existing contest
+                if (!contests.length) {
+                    MESSAGE.channel.send("Contest `" + argValue + "` does not exist...");
+                    return ERR_CONTEST_NOT_FOUND;
+                }
+
+                argumentContestId = argValue;
+                break;
+            case "-ty":
+            case "--type":
+                argumentType = argValue;
+                break;
+            default:
+                break;
+        }
+    }
+
     // check for statistics
     if (!contestAttendeeStatistics.length) {
         MESSAGE.channel.send("There are no statistics logged for you, yet...");
@@ -666,6 +712,21 @@ function personalStats() {
     // display medals
     var medalsString = "";
     for (var i = 0; i < contestAttendeeStatistics.length; i++) {
+        
+        // check, whether contest has fitting type
+        if (argumentType) {
+            // query contests
+            SQL = "SELECT type FROM contests WHERE contestId = ?";
+            DATABASE_DATA = [contestAttendeeStatistics[i].contestId];
+            RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+            var contests = RECORDS;
+
+            if (contests[0].type !== argumentType) {
+                continue;
+            }
+        }
+
         switch (contestAttendeeStatistics[i].place) {
             case 1:
                 medalsString = medalsString + '🥇 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].points + ")\n";
@@ -681,7 +742,7 @@ function personalStats() {
         }
     }
     
-    if (medalsString !== "") {
+    if (medalsString !== "" && !argumentContestId) {
         embed.addFields({
             name: "Medals 🏅",
             value: '```' + medalsString + '```',
@@ -693,19 +754,48 @@ function personalStats() {
     var performanceString = "";
 
     // average contest points
-    SQL = "SELECT avg(points) as averageContestPoints FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ?";
-    DATABASE_DATA = [attendeeId, 0];
+    if (argumentType) {
+        SQL = `SELECT avg(points) AS averageContestPoints
+            FROM contest_attendee_statistics AS a
+            INNER JOIN contests AS b
+            ON a.contestId = b.contestId
+            WHERE a.attendeeId = ? AND a.round = ? AND b.type = ?`;
+        DATABASE_DATA = [attendeeId, 0, argumentType];
+    } else {
+        SQL = `SELECT avg(points) AS averageContestPoints
+            FROM contest_attendee_statistics
+            WHERE attendeeId = ? AND round = ?`;
+        DATABASE_DATA = [attendeeId, 0];
+    }
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
     var contestAttendeeStatisticsACP = RECORDS;
 
     var averageContestPointsRounded = Math.round(contestAttendeeStatisticsACP[0].averageContestPoints * 100) / 100;
 
-    performanceString = performanceString + "Ø Points per Contest".padEnd(25) + averageContestPointsRounded + "\n";
+    if (!argumentContestId) {
+        performanceString = performanceString + "Ø Points per Contest".padEnd(25) + averageContestPointsRounded + "\n";
+    }
 
     // average round points
-    SQL = "SELECT avg(points) as averageRoundPoints FROM contest_attendee_statistics WHERE attendeeId = ? AND round > ?";
-    DATABASE_DATA = [attendeeId, 0];
+    if (argumentContestId) {
+        SQL = `SELECT avg(points) AS averageRoundPoints
+            FROM contest_attendee_statistics
+            WHERE attendeeId = ? AND round > ? AND contestId = ?`;
+        DATABASE_DATA = [attendeeId, 0, argumentContestId];
+    } else if (argumentType) {
+        SQL = `SELECT avg(points) AS averageRoundPoints
+            FROM contest_attendee_statistics AS a
+            INNER JOIN contests AS b
+            ON a.contestId = b.contestId
+            WHERE a.attendeeId = ? AND a.round > ? AND b.type = ?`;
+        DATABASE_DATA = [attendeeId, 0, argumentType];
+    } else {
+        SQL = `SELECT avg(points) AS averageRoundPoints
+            FROM contest_attendee_statistics
+            WHERE attendeeId = ? AND round > ?`;
+        DATABASE_DATA = [attendeeId, 0];
+    }
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
     var contestAttendeeStatisticsARP = RECORDS;
@@ -748,6 +838,24 @@ function boardContest() {
         return ERR_NO_STATS;
     }
 
+    // board options
+    var argName, argValue;
+    var argumentType;
+    for (var i = 1; i < ARGS.length; i++) {
+
+        argName = ARGS[i].substr(0, ARGS[i].indexOf('='));
+        argValue = ARGS[i].split('=')[1];
+
+        switch (argName) {
+            case "-ty":
+            case "--type":
+                argumentType = argValue;
+                break;
+            default:
+                break;
+        }
+    }
+
     // prepare attendees
     var attendees = [];
     var attendeePoints;
@@ -755,7 +863,7 @@ function boardContest() {
         attendeePoints = 0;
 
         // query general statistics
-        SQL = "SELECT place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ?";
+        SQL = "SELECT contestId, place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ?";
         DATABASE_DATA = [contestAttendeeStatisticsDistinct[i].attendeeId, 0];
         RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
@@ -763,6 +871,21 @@ function boardContest() {
 
         // calculate overall place
         for (var j = 0; j < contestAttendeeStatistics.length; j++) {
+
+            // check, whether contest has fitting type
+            if (argumentType) {
+                // query contests
+                SQL = "SELECT type FROM contests WHERE contestId = ?";
+                DATABASE_DATA = [contestAttendeeStatistics[j].contestId];
+                RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+                var contests = RECORDS;
+
+                if (contests[0].type !== argumentType) {
+                    continue;
+                }
+            }
+
             switch (contestAttendeeStatistics[j].place) {
                 case 1:
                     attendeePoints = attendeePoints + 3;
@@ -803,7 +926,7 @@ function boardContest() {
         playerStatisticsString = playerStatisticsString + contestAttendees[0].name.padEnd(25);
 
         // query general statistics
-        SQL = "SELECT place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ? ORDER BY place";
+        SQL = "SELECT contestId, place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ? ORDER BY place";
         DATABASE_DATA = [sortedAttendees[i].id, 0];
         RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
@@ -811,6 +934,21 @@ function boardContest() {
 
         // display medals
         for (var j = 0; j < contestAttendeeStatistics.length; j++) {
+
+            // check, whether contest has fitting type
+            if (argumentType) {
+                // query contests
+                SQL = "SELECT type FROM contests WHERE contestId = ?";
+                DATABASE_DATA = [contestAttendeeStatistics[j].contestId];
+                RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+                var contests = RECORDS;
+
+                if (contests[0].type !== argumentType) {
+                    continue;
+                }
+            }
+
             switch (contestAttendeeStatistics[j].place) {
                 case 1:
                     playerStatisticsString = playerStatisticsString + '🥇';
@@ -841,8 +979,23 @@ function boardContest() {
     var topPerformersString = "";
 
     // average contest points
-    SQL = "SELECT attendeeId, avg(points) as averageContestPoints FROM contest_attendee_statistics WHERE round = ? GROUP BY attendeeId ORDER BY averageContestPoints DESC";
-    DATABASE_DATA = [0];
+    if (argumentType) {
+        SQL = `SELECT a.attendeeId, avg(points) AS averageContestPoints
+            FROM contest_attendee_statistics AS a
+            INNER JOIN contests AS b
+            ON a.contestId = b.contestId
+            WHERE a.round = ? AND b.type = ?
+            GROUP BY a.attendeeId
+            ORDER BY averageContestPoints DESC`;
+        DATABASE_DATA = [0, argumentType];
+    } else {
+        SQL = `SELECT attendeeId, avg(points) AS averageContestPoints
+            FROM contest_attendee_statistics
+            WHERE round = ?
+            GROUP BY attendeeId
+            ORDER BY averageContestPoints DESC`;
+        DATABASE_DATA = [0];
+    }
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
     var contestAttendeeStatisticsACP = RECORDS;
@@ -874,8 +1027,24 @@ function boardContest() {
     topPerformersString = topPerformersString + "\n"
     
     // average round points
-    SQL = "SELECT attendeeId, avg(points) as averageRoundPoints FROM contest_attendee_statistics WHERE round > ? GROUP BY attendeeId ORDER BY averageRoundPoints DESC";
-    DATABASE_DATA = [0];
+    //SQL = "SELECT attendeeId, avg(points) as averageRoundPoints FROM contest_attendee_statistics WHERE round > ? GROUP BY attendeeId ORDER BY averageRoundPoints DESC";
+    if (argumentType) {
+        SQL = `SELECT a.attendeeId, avg(points) AS averageRoundPoints
+            FROM contest_attendee_statistics AS a
+            INNER JOIN contests AS b
+            ON a.contestId = b.contestId
+            WHERE a.round > ? AND b.type = ?
+            GROUP BY a.attendeeId
+            ORDER BY averageRoundPoints DESC`;
+        DATABASE_DATA = [0, argumentType];
+    } else {
+        SQL = `SELECT attendeeId, avg(points) AS averageRoundPoints
+            FROM contest_attendee_statistics
+            WHERE round > ?
+            GROUP BY attendeeId
+            ORDER BY averageRoundPoints DESC`;
+        DATABASE_DATA = [0];
+    }
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
     var contestAttendeeStatisticsARP = RECORDS;
@@ -1462,7 +1631,7 @@ function printContestSheet(contestId) {
 
     // prepare rated symbol
     var ratedString = "";
-    if (contests[0].rated === true) {
+    if (contests[0].rated === 1) {
         ratedString = " • `⭐`";
     }
 
@@ -1490,17 +1659,25 @@ function printContestSheet(contestId) {
             break;
     }
 
-    // display entry count (mode)
+    // display options
+    var optionsString = "";
+    
+    if (contests[0].type) {
+        optionsString = optionsString + "Type".padEnd(16) + contests[0].type + "\n";
+    }
+
     if (contests[0].entryCount > 0) {
+        optionsString = optionsString + "Entry Count".padEnd(16) + contests[0].entryCount + "\n";
+    }
+
+    if (contests[0].maxRoundCount > 0) {
+        optionsString = optionsString + "Round Count".padEnd(16) + contests[0].maxRoundCount + "\n";
+    }
+
+    if (optionsString !== "") {
         embed.addFields({
-            name: "Tournament Mode 🏅",
-            value: "Limited to " + contests[0].entryCount + " entries per attendee",
-            inline: false
-        });
-    } else {
-        embed.addFields({
-            name: "Unlimited Mode ♾️",
-            value: "Unlimited entries per attendee",
+            name: "Options 📚",
+            value: '```' + optionsString + '```',
             inline: false
         });
     }
@@ -1828,10 +2005,10 @@ function checkFinished(contestId) {
 function refreshStatistics(contestId) {
     // query contests
     if (contestId) {
-        SQL = "SELECT contestId, state, currentRound FROM contests WHERE contestId = ?";
+        SQL = "SELECT contestId, state, currentRound, rated FROM contests WHERE contestId = ?";
         DATABASE_DATA = [contestId];
     } else {
-        SQL = "SELECT contestId, state, currentRound FROM contests";
+        SQL = "SELECT contestId, state, currentRound, rated FROM contests";
         DATABASE_DATA = [];
     }
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
@@ -1878,6 +2055,17 @@ function refreshStatistics(contestId) {
                 return;
             } else {
                 console.info("Skipping statistics for contest '" + contests[i].contestId + "' since it's not closed...");
+                continue;
+            }
+        }
+
+        // check, whether contest is rated
+        if (contests[i].rated === 0) {
+            if (contestId) {
+                MESSAGE.channel.send("Contest `" + contestId + "` is not rated...");
+                return;
+            } else {
+                console.info("Skipping statistics for contest '" + contests[i].contestId + "' since it's not rated...");
                 continue;
             }
         }
@@ -2026,7 +2214,7 @@ function initializeDatabase() {
     const db = new sqlite3(DB_PATH);
 
     // create table "contests"
-    SQL = `CREATE TABLE IF NOT EXISTS contests (
+    SQL = `CREATE TABLE IF NOT EXISTS contests_bak (
         id INTEGER PRIMARY KEY,
         contestId TEXT NOT NULL UNIQUE,
         creationDate TEXT NOT NULL,
@@ -2037,6 +2225,7 @@ function initializeDatabase() {
         currentRound INTEGER NOT NULL,
         maxRoundCount INTEGER NOT NULL,
         rated INTEGER NOT NULL,
+        type TEXT NOT NULL,
         modtime TEXT NOT NULL)`;
 
     db.prepare(SQL).run();
