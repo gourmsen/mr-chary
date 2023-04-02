@@ -709,6 +709,24 @@ function personalStats() {
         return ERR_NO_STATS;
     }
 
+    // check for statistics of this type
+    if (argumentType) {
+        SQL = `SELECT a.contestId
+            FROM contest_attendee_statistics AS a
+            INNER JOIN contests AS b
+            ON a.contestId = b.contestId
+            WHERE a.attendeeId = ? AND b.type = ?`;
+        DATABASE_DATA = [attendeeId, argumentType];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var contests = RECORDS;
+
+        if (!contests.length) {
+            MESSAGE.channel.send("There are no statistics logged for you, yet...");
+            return ERR_NO_STATS;
+        }
+    }
+
     // display medals
     var medalsString = "";
     for (var i = 0; i < contestAttendeeStatistics.length; i++) {
@@ -853,6 +871,29 @@ function boardContest() {
                 break;
             default:
                 break;
+        }
+    }
+
+    // set description according to contest type
+    if (argumentType) {
+        embed.setDescription("**" + argumentType + "**");
+    }
+
+    // check for statistics of this type
+    if (argumentType) {
+        SQL = `SELECT a.contestId
+            FROM contest_attendee_statistics AS a
+            INNER JOIN contests AS b
+            ON a.contestId = b.contestId
+            WHERE b.type = ?`;
+        DATABASE_DATA = [argumentType];
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var contests = RECORDS;
+
+        if (!contests.length) {
+            MESSAGE.channel.send("There are no statistics logged for this type, yet...");
+            return ERR_NO_STATS;
         }
     }
 
