@@ -34,7 +34,7 @@ function defaultHelp() {
         {name: "`!cry help`", value: "Prints this help.", inline: false},
         {name: "`!cry list (-g|--group=<name>)`", value: "Lists all available items.", inline: false},
         {name: "`!cry random (-fs|--fill-slots) (-fm|--force-melee) (-fk|--force-kit) (-bl|--bloodline-level=<value>)`", value: "Generates a random loadout.", inline: false},
-        {name: "`!cry contest (create|delete|info|personal|board|join|leave|start|round|end|add|list|update|team)`", value: "Manages the contest.", inline: false}
+        {name: "`!cry contest (create|delete|options|info|personal|board|join|leave|start|round|end|add|list|update|team)`", value: "Manages the contest.", inline: false}
     );
 
     MESSAGE.channel.send({ embeds: [embed] });
@@ -49,6 +49,7 @@ function contestHelp() {
     .addFields(
         {name: "`!cry contest create [entries] [max rounds] [objective=value>:n]`", value: "Creates a new contest, e.g. `!cry contest create 3 Token=4 Kill=2 Assist=1 Revive=1` for a contest with 3 entries per attendee and 4 objectives. Entries are unlimited, when count is 0.", inline: false},
         {name: "`!cry contest delete [contest_id]`",                                value: "Deletes the contest.", inline: false},
+        {name: "`!cry contest options [contest_id] [option=value<=subvalue>]`",     value: "Changes contest options.", inline: false},
         {name: "`!cry contest info [contest_id]`",                                  value: "Shows information about the contest.", inline: false},
         {name: "`!cry contest personal [contest_id]`",                              value: "Shows personal statistics about the contest.", inline: false},
         {name: "`!cry contest board`",                                              value: "Shows the leaderboard.", inline: false},

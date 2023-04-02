@@ -16,22 +16,22 @@ const STAT_CLOSED = 'Closed';
 
 // error codes
 const ERR_CONTEST_NOT_FOUND = 1;
-const ERR_ENTRY_COUNT = 2;
-const ERR_OBJECTIVE_MINIMUM = 3;
-const ERR_ALREADY_JOINED = 4;
-const ERR_NO_CONTESTS = 5;
-const ERR_ONLY_AUTHOR = 6;
-const ERR_SAME_STATE = 7;
-const ERR_DEAD_CONTEST = 8;
-const ERR_NOT_STARTED = 9;
-const ERR_MAXIMUM_ENTRIES = 10;
-const ERR_NOT_NUMERIC = 11;
-const ERR_NOT_ATTENDING = 12;
-const ERR_NOT_OPEN = 13;
-const ERR_ROUND_COUNT = 14;
-const ERR_ENTRY_NOT_FOUND = 15;
-const ERR_TEAM_SIZE = 16;
-const ERR_NO_STATS = 17;
+const ERR_OBJECTIVE_MINIMUM = 2;
+const ERR_ALREADY_JOINED = 3;
+const ERR_NO_CONTESTS = 4;
+const ERR_ONLY_AUTHOR = 5;
+const ERR_SAME_STATE = 6;
+const ERR_DEAD_CONTEST = 7;
+const ERR_NOT_STARTED = 8;
+const ERR_MAXIMUM_ENTRIES = 9;
+const ERR_NOT_NUMERIC = 10;
+const ERR_NOT_ATTENDING = 11;
+const ERR_NOT_OPEN = 12;
+const ERR_ENTRY_NOT_FOUND = 13;
+const ERR_TEAM_SIZE = 14;
+const ERR_NO_STATS = 15;
+const ERR_NO_OPTION = 16;
+const ERR_RATED = 17;
 
 module.exports = {
     name: 'contest',
@@ -52,6 +52,10 @@ module.exports = {
             case "d":
             case "delete":
                 deleteContest();
+                break;
+            case "o":
+            case "options":
+                optionsContest();
                 break;
             case "j":
             case "join":
@@ -146,35 +150,11 @@ function createContest() {
     var contestAuthorId = MESSAGE.author.id;
     var contestAuthorName = MESSAGE.author.username;
     var contestCurrentRound = 1;
-
-    // check for entry count
-    if (ARGS.length < 2) {
-        MESSAGE.channel.send("Enter the allowed entry count (0 for unlimited)...");
-        return ERR_ENTRY_COUNT;
-    }
-
-    // fill entry count
-    var contestEntryCount = parseInt(ARGS[1]);
-    if (isNaN(contestEntryCount)) {
-        MESSAGE.channel.send("Enter a numeric value for the entry count...");
-        return ERR_NOT_NUMERIC;
-    }
-
-    // check for maximum round count
-    if (ARGS.length < 3) {
-        MESSAGE.channel.send("Enter the maximum round count (0 for unlimited)...");
-        return ERR_ROUND_COUNT;
-    }
-
-    // fill maximum round count
-    var contestMaxRoundCount = parseInt(ARGS[2]);
-    if (isNaN(contestMaxRoundCount)) {
-        MESSAGE.channel.send("Enter a numeric value for the maximium round count...");
-        return ERR_NOT_NUMERIC;
-    }
+    var contestEntryCount = 0;
+    var contestMaxRoundCount = 0;
 
     // check for objectives
-    if (ARGS.length < 4) {
+    if (ARGS.length < 2) {
         MESSAGE.channel.send("Enter at least one objective...");
         return ERR_OBJECTIVE_MINIMUM;
     }
@@ -183,7 +163,7 @@ function createContest() {
     var contestObjectives = [];
     var objectiveName, objectiveValue;
 
-    for (var i = 3; i < ARGS.length; i++) {
+    for (var i = 1; i < ARGS.length; i++) {
         objectiveName = ARGS[i].substr(0, ARGS[i].indexOf('='));
         objectiveValue = parseFloat(ARGS[i].split('=')[1]);
 
@@ -316,6 +296,152 @@ function deleteContest() {
 
     MESSAGE.channel.send("Contest `" + contestId + "` has been deleted!");
     console.info(MESSAGE.author.username + ' (' + MESSAGE.author.id + ') ' + "has deleted contest '" + contestId + "'!");
+}
+
+function optionsContest() {
+    var contestId = ARGS[1];
+
+    // query contests
+    SQL = "SELECT authorId, state FROM contests WHERE contestId = ?";
+    DATABASE_DATA = [contestId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contests = RECORDS;
+
+    // check existing contest
+    if (!contests.length) {
+        MESSAGE.channel.send("Contest `" + contestId + "` does not exist...");
+        return ERR_CONTEST_NOT_FOUND;
+    }
+
+    // check author
+    if (contests[0].authorId !== MESSAGE.author.id) {
+        MESSAGE.channel.send("Only the contest author can change the contest options...");
+        return ERR_ONLY_AUTHOR;
+    }
+
+    // only changeable, when in open state
+    if (contests[0].state !== STAT_OPEN) {
+        MESSAGE.channel.send("Contest isn't open anymore...");
+        return ERR_NOT_OPEN;
+    }
+
+    // check options
+    if (ARGS.length < 3) {
+        MESSAGE.channel.send("Enter at least one option...");
+        return ERR_NO_OPTION;
+    }
+
+    // change options
+    var argName, argValue, argSubValue;
+    for (var i = 2; i < ARGS.length; i++) {
+
+        argName = ARGS[i].substr(0, ARGS[i].indexOf('='));
+        argValue = ARGS[i].split('=')[1];
+        argSubValue = ARGS[i].split('=')[2];
+
+        switch (argName) {
+            case "-ec":
+            case "--entry-count":
+                if (isNaN(argValue)) {
+                    MESSAGE.channel.send("Enter a numeric value for the entry count..." );
+                    return ERR_NOT_NUMERIC;
+                }
+
+                // prepare contest data for table "contests"
+                MODTIME = getModtime();
+                SQL = "UPDATE contests SET entryCount = ?, modtime = ? WHERE contestId = ?";
+                DATABASE_DATA = [argValue, MODTIME, contestId];
+                writeDatabase(SQL, DATABASE_DATA);
+                break;
+            case "-rc":
+            case "--round-count":
+                if (isNaN(argValue)) {
+                    MESSAGE.channel.send("Enter a numeric value for the maximum round count..." );
+                    return ERR_NOT_NUMERIC;
+                }
+                
+                // prepare contest data for table "contests"
+                MODTIME = getModtime();
+                SQL = "UPDATE contests SET maxRoundCount = ?, modtime = ? WHERE contestId = ?";
+                DATABASE_DATA = [argValue, MODTIME, contestId];
+                writeDatabase(SQL, DATABASE_DATA);
+                break;
+            case "-rf":
+            case "--rated-flag":
+                // check options
+                if (argValue !== "true" && argValue !== "false") {
+                    MESSAGE.channel.send("Enter `true` / `false` for the rated flag..." );
+                    return ERR_RATED;
+                }
+
+                if (argValue === "true") {
+                    argValue = 1;
+                } else {
+                    argValue = 0;
+                }
+
+                // prepare contest data for table "contests"
+                MODTIME = getModtime();
+                SQL = "UPDATE contests SET rated = ?, modtime = ? WHERE contestId = ?";
+                DATABASE_DATA = [argValue, MODTIME, contestId];
+                writeDatabase(SQL, DATABASE_DATA);
+                break;
+            case "-ao":
+            case "--add-objective":
+                if (isNaN(argSubValue)) {
+                    MESSAGE.channel.send("Enter a numeric value for objective `" + argValue + "`..." );
+                    return ERR_NOT_NUMERIC;
+                }
+
+                // query objectives
+                SQL = "SELECT name FROM contest_objectives WHERE contestId = ? AND name = ?";
+                DATABASE_DATA = [contestId, argValue];
+                RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+                var contestObjectives = RECORDS;
+
+                // prepare contest data for table "contest_objectives"
+                MODTIME = getModtime();
+
+                // check existing objective
+                if (!contestObjectives.length) {
+                    SQL = "INSERT INTO contest_objectives(contestId, name, value, modtime) VALUES (?, ?, ?, ?)";
+                    DATABASE_DATA = [contestId, argValue, argSubValue, MODTIME];
+                } else {
+                    SQL = "UPDATE contest_objectives SET value = ?, modtime = ? WHERE contestId = ? AND name = ?";
+                    DATABASE_DATA = [argSubValue, MODTIME, contestId, argValue];
+                }
+                writeDatabase(SQL, DATABASE_DATA);
+                break;
+            case "-ro":
+            case "--remove-objective":
+                // query objectives
+                SQL = "SELECT name FROM contest_objectives WHERE contestId = ?";
+                DATABASE_DATA = [contestId];
+                RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+                var contestObjectives = RECORDS;
+
+                if (contestObjectives.length < 2) {
+                    MESSAGE.channel.send("Can't delete more objectives...");
+                    return ERR_OBJECTIVE_MINIMUM;
+                }
+
+                // delete contest objective
+                SQL = "DELETE FROM contest_objectives WHERE contestId = ? AND name = ?";
+                DATABASE_DATA = [contestId, argValue];
+                writeDatabase(SQL, DATABASE_DATA);
+                break;
+            default:
+                break;
+        }
+    }
+    
+    MESSAGE.channel.send("Options for contest `" + contestId + "` changed!");
+    console.info(MESSAGE.author.username + ' (' + MESSAGE.author.id + ') ' + "has changed options for contest '" + contestId + "'!");
+
+    printContestSheet(contestId);
 }
 
 function joinContest() {
