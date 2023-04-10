@@ -128,6 +128,7 @@ function createContest() {
 
     var contests;
     while (true) {
+
         // query contests
         SQL = "SELECT contestId FROM contests WHERE contestId = ?";
         DATABASE_DATA = [contestId];
@@ -257,10 +258,14 @@ function deleteContest() {
         return ERR_CONTEST_NOT_FOUND;
     }
 
-    // check author
-    if (contests[0].authorId !== MESSAGE.author.id) {
-        MESSAGE.channel.send("Only the contest author can delete the contest...");
-        return ERR_ONLY_AUTHOR;
+    // check developer
+    if (!config.developers.includes(MESSAGE.author.id)) {
+
+        // check author
+        if (contests[0].authorId !== MESSAGE.author.id) {
+            MESSAGE.channel.send("Only the contest author can delete the contest...");
+            return ERR_ONLY_AUTHOR;
+        }
     }
 
     // truncate contests table
@@ -318,16 +323,20 @@ function optionsContest() {
         return ERR_CONTEST_NOT_FOUND;
     }
 
-    // check author
-    if (contests[0].authorId !== MESSAGE.author.id) {
-        MESSAGE.channel.send("Only the contest author can change the contest options...");
-        return ERR_ONLY_AUTHOR;
-    }
+    // check developer
+    if (!config.developers.includes(MESSAGE.author.id)) {
 
-    // only changeable, when in open state
-    if (contests[0].state !== STAT_OPEN) {
-        MESSAGE.channel.send("Contest isn't open anymore...");
-        return ERR_NOT_OPEN;
+        // check author
+        if (contests[0].authorId !== MESSAGE.author.id) {
+            MESSAGE.channel.send("Only the contest author can change the contest options...");
+            return ERR_ONLY_AUTHOR;
+        }
+
+        // only changeable, when in open state
+        if (contests[0].state !== STAT_OPEN) {
+            MESSAGE.channel.send("Contest isn't open anymore...");
+            return ERR_NOT_OPEN;
+        }
     }
 
     // check options
@@ -339,7 +348,6 @@ function optionsContest() {
     // change options
     var argName, argValue, argSubValue;
     for (var i = 2; i < ARGS.length; i++) {
-
         argName = ARGS[i].substr(0, ARGS[i].indexOf('='));
         argValue = ARGS[i].split('=')[1];
         argSubValue = ARGS[i].split('=')[2];
@@ -373,6 +381,7 @@ function optionsContest() {
                 break;
             case "-rf":
             case "--rated-flag":
+
                 // check options
                 if (argValue !== "true" && argValue !== "false") {
                     MESSAGE.channel.send("Enter `true` / `false` for the rated flag..." );
@@ -420,6 +429,7 @@ function optionsContest() {
                 break;
             case "-ro":
             case "--remove-objective":
+
                 // query objectives
                 SQL = "SELECT name FROM contest_objectives WHERE contestId = ?";
                 DATABASE_DATA = [contestId];
@@ -439,12 +449,13 @@ function optionsContest() {
                 break;
             case "-ty":
             case "--type":
-                    // prepare contest data for table "contests"
-                    MODTIME = getModtime();
-                    SQL = "UPDATE contests SET type = ?, modtime = ? WHERE contestId = ?";
-                    DATABASE_DATA = [argValue, MODTIME, contestId];
-                    writeDatabase(SQL, DATABASE_DATA);
-                    break;
+
+                // prepare contest data for table "contests"
+                MODTIME = getModtime();
+                SQL = "UPDATE contests SET type = ?, modtime = ? WHERE contestId = ?";
+                DATABASE_DATA = [argValue, MODTIME, contestId];
+                writeDatabase(SQL, DATABASE_DATA);
+                break;
             default:
                 break;
         }
@@ -532,10 +543,14 @@ function leaveContest() {
         return ERR_CONTEST_NOT_FOUND;
     }
 
-    // only leavable, when in open state
-    if (contests[0].state !== STAT_OPEN) {
-        MESSAGE.channel.send("Contest has already started/ended...");
-        return ERR_NOT_OPEN;
+    // check developer
+    if (!config.developers.includes(MESSAGE.author.id)) {
+        
+        // only leavable, when in open state
+        if (contests[0].state !== STAT_OPEN) {
+            MESSAGE.channel.send("Contest has already started/ended...");
+            return ERR_NOT_OPEN;
+        }
     }
 
     var attendeeId = MESSAGE.author.id;
@@ -604,6 +619,7 @@ function listContests() {
     // list contests
     var contestsString = "";
     for(var i = 0; i < contests.length; i++) {
+
         // prepare contest string for this contest
         contestsString = contestsString + '• `';
 
@@ -672,13 +688,13 @@ function personalStats() {
     var argName, argValue;
     var argumentContestId, argumentType;
     for (var i = 1; i < ARGS.length; i++) {
-
         argName = ARGS[i].substr(0, ARGS[i].indexOf('='));
         argValue = ARGS[i].split('=')[1];
 
         switch (argName) {
             case "-id":
             case "--contest-id":
+
                 // query contests
                 SQL = "SELECT contestId FROM contests WHERE contestId = ?";
                 DATABASE_DATA = [argValue];
@@ -1043,6 +1059,7 @@ function boardContest() {
 
     topPerformersString = topPerformersString + "Ø Points per Contest".padEnd(25);
     for (var i = 0; i < 3; i++) {
+
         // query attendees
         SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
         DATABASE_DATA = [contestAttendeeStatisticsACP[i].attendeeId];
@@ -1068,7 +1085,6 @@ function boardContest() {
     topPerformersString = topPerformersString + "\n"
     
     // average round points
-    //SQL = "SELECT attendeeId, avg(points) as averageRoundPoints FROM contest_attendee_statistics WHERE round > ? GROUP BY attendeeId ORDER BY averageRoundPoints DESC";
     if (argumentType) {
         SQL = `SELECT a.attendeeId, avg(points) AS averageRoundPoints
             FROM contest_attendee_statistics AS a
@@ -1092,6 +1108,7 @@ function boardContest() {
 
     topPerformersString = topPerformersString + "Ø Points per Round".padEnd(25);
     for (var i = 0; i < 3; i++) {
+
         // query attendees
         SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
         DATABASE_DATA = [contestAttendeeStatisticsARP[i].attendeeId];
@@ -1278,6 +1295,7 @@ function entryContest() {
 
     // check for too many entries
     if (contests[0].entryCount > 0) {
+
         // query entries distinctly
         SQL = "SELECT DISTINCT entryId FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ?";
         DATABASE_DATA = [contestId, attendeeId];
@@ -1295,6 +1313,7 @@ function entryContest() {
     var entryId = crypto.randomBytes(5).toString("hex");
     var contestAttendeeEntries;
     while (true) {
+
         // query entries
         SQL = "SELECT entryId FROM contest_attendee_entries WHERE entryId = ?";
         DATABASE_DATA = [entryId];
@@ -1385,11 +1404,12 @@ function entryContest() {
 
     isFinished = checkFinished(contestId);
     if (isFinished) {
+
         // prepare contest data for table "contests"
         MODTIME = getModtime();
 
         SQL = "UPDATE contests SET state = ?, modtime = ? WHERE contestId = ?";
-    
+
         DATABASE_DATA = [
             STAT_CLOSED,
             MODTIME,
@@ -1537,6 +1557,7 @@ function teamContest() {
     var currentTeam = 0;
     var overallTeamSize = 0;
     for (var i = 2; i < ARGS.length; i++) {
+
         // fill team sizes
         teamSizes[currentTeam] = parseInt(ARGS[i]);
         if (isNaN(teamSizes[currentTeam])) {
@@ -1892,6 +1913,7 @@ function printRoundSheet(contestId, contestRound) {
         objectiveStatistics = new Array(contestObjectives.length).fill(Number(0));
 
         for (var j = 0; j < contestObjectives.length; j++) {
+
             // query entries
             SQL = "SELECT * FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ? AND objectiveName = ? AND round = ?";
             DATABASE_DATA = [contestId, contestAttendees[i].attendeeId, contestObjectives[j].name, contestRound];
@@ -2089,6 +2111,7 @@ function refreshStatistics(contestId) {
 
     // refresh general statistics
     for (var i = 0; i < contests.length; i++) {
+
         // check, whether contest hasn't been closed, yet
         if (contests[i].state !== STAT_CLOSED) {
             if (contestId) {
@@ -2138,6 +2161,7 @@ function refreshStatistics(contestId) {
 
         // calculate points and places for every round
         for (var j = 0; j <= contests[i].currentRound; j++) {
+
             // prepare attendees
             var attendees = [];
             var attendeePoints, attendeePointsRounded;
@@ -2195,6 +2219,7 @@ function refreshStatistics(contestId) {
 
                 // refresh objective statistics
                 for (var l = 0; l < contestObjectives.length; l++) {
+                    
                     // query entries (sum of objectives)
                     if (j > 0) {
                         SQL = "SELECT sum(objectiveValue) AS objectiveSum FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ? AND round = ? AND objectiveName = ?";
