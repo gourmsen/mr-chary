@@ -811,33 +811,6 @@ function personalStats() {
         performanceString = performanceString + "Ø Points per Contest".padEnd(25) + averageContestPointsRounded + "\n";
     }
 
-    // average round points
-    if (argumentContestId) {
-        SQL = `SELECT avg(points) AS averageRoundPoints
-            FROM contest_attendee_statistics
-            WHERE attendeeId = ? AND round > ? AND contestId = ?`;
-        DATABASE_DATA = [attendeeId, 0, argumentContestId];
-    } else if (argumentType) {
-        SQL = `SELECT avg(points) AS averageRoundPoints
-            FROM contest_attendee_statistics AS a
-            INNER JOIN contests AS b
-            ON a.contestId = b.contestId
-            WHERE a.attendeeId = ? AND a.round > ? AND b.type = ?`;
-        DATABASE_DATA = [attendeeId, 0, argumentType];
-    } else {
-        SQL = `SELECT avg(points) AS averageRoundPoints
-            FROM contest_attendee_statistics
-            WHERE attendeeId = ? AND round > ?`;
-        DATABASE_DATA = [attendeeId, 0];
-    }
-    RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-    var contestAttendeeStatisticsARP = RECORDS;
-
-    var averageRoundPointsRounded = Math.round(contestAttendeeStatisticsARP[0].averageRoundPoints * 100) / 100;
-
-    performanceString = performanceString + "Ø Points per Round".padEnd(25) + averageRoundPointsRounded + "\n";
-
     if (performanceString !== "") {
         embed.addFields({
             name: "Performance 🏹",
@@ -1084,53 +1057,6 @@ function boardContest() {
 
     topPerformersString = topPerformersString + "\n"
     
-    // average round points
-    if (argumentType) {
-        SQL = `SELECT a.attendeeId, avg(points) AS averageRoundPoints
-            FROM contest_attendee_statistics AS a
-            INNER JOIN contests AS b
-            ON a.contestId = b.contestId
-            WHERE a.round > ? AND b.type = ?
-            GROUP BY a.attendeeId
-            ORDER BY averageRoundPoints DESC`;
-        DATABASE_DATA = [0, argumentType];
-    } else {
-        SQL = `SELECT attendeeId, avg(points) AS averageRoundPoints
-            FROM contest_attendee_statistics
-            WHERE round > ?
-            GROUP BY attendeeId
-            ORDER BY averageRoundPoints DESC`;
-        DATABASE_DATA = [0];
-    }
-    RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-    var contestAttendeeStatisticsARP = RECORDS;
-
-    topPerformersString = topPerformersString + "Ø Points per Round".padEnd(25);
-    for (var i = 0; i < 3; i++) {
-
-        // query attendees
-        SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-        DATABASE_DATA = [contestAttendeeStatisticsARP[i].attendeeId];
-        RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-        var contestAttendees = RECORDS;
-
-        var averageRoundPointsRounded = Math.round(contestAttendeeStatisticsARP[i].averageRoundPoints * 100) / 100;
-
-        switch (i) {
-            case 0:
-                topPerformersString = topPerformersString + "🥇 " + contestAttendees[i].name.padEnd(15) + " (" + averageRoundPointsRounded + ")\n";
-                break;
-            case 1:
-                topPerformersString = topPerformersString + "".padEnd(25) + "🥈 " + contestAttendees[i].name.padEnd(15) + " (" + averageRoundPointsRounded + ")\n";
-                break;
-            case 2:
-                topPerformersString = topPerformersString + "".padEnd(25) + "🥉 " + contestAttendees[i].name.padEnd(15) + " (" + averageRoundPointsRounded + ")\n";
-                break;
-        }
-    }
-
     if (topPerformersString !== "") {
         embed.addFields({
             name: "Top Performers 😎",
@@ -1138,7 +1064,7 @@ function boardContest() {
             inline: false
         });
     }
-
+    
     MESSAGE.channel.send({ embeds: [embed] });
 }
 
@@ -2219,7 +2145,7 @@ function refreshStatistics(contestId) {
 
                 // refresh objective statistics
                 for (var l = 0; l < contestObjectives.length; l++) {
-                    
+
                     // query entries (sum of objectives)
                     if (j > 0) {
                         SQL = "SELECT sum(objectiveValue) AS objectiveSum FROM contest_attendee_entries WHERE contestId = ? AND attendeeId = ? AND round = ? AND objectiveName = ?";
