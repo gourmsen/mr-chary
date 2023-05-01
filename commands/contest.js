@@ -675,14 +675,7 @@ function personalStats() {
     // display contest round
     embed.setTitle("🤠 Personal Statistics");
     embed.setDescription("");
-    embed.setColor("#9403fc");
-
-    // query general statistics
-    SQL = "SELECT contestId, points, place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ? ORDER BY place";
-    DATABASE_DATA = [attendeeId, 0];
-    RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-    var contestAttendeeStatistics = RECORDS;
+    embed.setColor("#32a852");
 
     // personal statistics options
     var argName, argValue;
@@ -694,20 +687,6 @@ function personalStats() {
         switch (argName) {
             case "-id":
             case "--contest-id":
-
-                // query contests
-                SQL = "SELECT contestId FROM contests WHERE contestId = ?";
-                DATABASE_DATA = [argValue];
-                RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-                var contests = RECORDS;
-
-                // check existing contest
-                if (!contests.length) {
-                    MESSAGE.channel.send("Contest `" + argValue + "` does not exist...");
-                    return ERR_CONTEST_NOT_FOUND;
-                }
-
                 argumentContestId = argValue;
                 break;
             case "-ty":
@@ -719,102 +698,138 @@ function personalStats() {
         }
     }
 
+    // query general statistics
+    if (argumentType) {
+        SQL = `SELECT a.contestId, a.points, a.place
+            FROM contest_attendee_statistics AS a
+            INNER JOIN contests AS b
+            ON a.contestId = b.contestId
+            WHERE a.attendeeId = ? AND a.round = ? AND b.type = ?
+            ORDER BY place`;
+        DATABASE_DATA = [attendeeId, 0, argumentType];
+    } else if (argumentContestId) {
+        SQL = "SELECT contestId, points, place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ? AND contestId = ? ORDER BY place";
+        DATABASE_DATA = [attendeeId, 0, argumentContestId];
+    } else {
+        SQL = "SELECT contestId, points, place FROM contest_attendee_statistics WHERE attendeeId = ? AND round = ? ORDER BY place";
+        DATABASE_DATA = [attendeeId, 0];
+    }
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendeeStatistics = RECORDS;
+
     // check for statistics
     if (!contestAttendeeStatistics.length) {
         MESSAGE.channel.send("There are no statistics logged for you, yet...");
         return ERR_NO_STATS;
     }
 
-    // check for statistics of this type
-    if (argumentType) {
-        SQL = `SELECT a.contestId
-            FROM contest_attendee_statistics AS a
-            INNER JOIN contests AS b
-            ON a.contestId = b.contestId
-            WHERE a.attendeeId = ? AND b.type = ?`;
-        DATABASE_DATA = [attendeeId, argumentType];
-        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+    // display contests
+    if (!argumentContestId) {
+        var contestsString = "";
 
-        var contests = RECORDS;
-
-        if (!contests.length) {
-            MESSAGE.channel.send("There are no statistics logged for you, yet...");
-            return ERR_NO_STATS;
-        }
-    }
-
-    // display medals
-    var medalsString = "";
-    for (var i = 0; i < contestAttendeeStatistics.length; i++) {
-        
-        // check, whether contest has fitting type
-        if (argumentType) {
-            // query contests
-            SQL = "SELECT type FROM contests WHERE contestId = ?";
-            DATABASE_DATA = [contestAttendeeStatistics[i].contestId];
-            RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-            var contests = RECORDS;
-
-            if (contests[0].type !== argumentType) {
-                continue;
+        for (var i = 0; i < contestAttendeeStatistics.length; i++) {
+            
+            switch (contestAttendeeStatistics[i].place) {
+                case 1:
+                    contestsString = contestsString + '🥇 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].place + ")\n";
+                    break;
+                case 2:
+                    contestsString = contestsString + '🥈 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].place + ")\n";
+                    break;
+                case 3:
+                    contestsString = contestsString + '🥉 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].place + ")\n";
+                    break;
+                default:
+                    contestsString = contestsString + '🎗️ ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].place + ")\n";
+                    break;
             }
         }
-
-        switch (contestAttendeeStatistics[i].place) {
-            case 1:
-                medalsString = medalsString + '🥇 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].points + ")\n";
-                break;
-            case 2:
-                medalsString = medalsString + '🥈 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].points + ")\n";
-                break;
-            case 3:
-                medalsString = medalsString + '🥉 ' + contestAttendeeStatistics[i].contestId + " (" + contestAttendeeStatistics[i].points + ")\n";
-                break;
-            default:
-                break;
+        
+        if (contestsString !== "") {
+            embed.addFields({
+                name: "Contests (" + contestAttendeeStatistics.length + ") 🏅",
+                value: '```' + contestsString + '```',
+                inline: false
+            });
         }
-    }
-    
-    if (medalsString !== "" && !argumentContestId) {
-        embed.addFields({
-            name: "Medals 🏅",
-            value: '```' + medalsString + '```',
-            inline: false
-        });
     }
 
     // display performance
-    var performanceString = "";
+    if (!argumentContestId) {
+        var performanceString = "Statistic".padEnd(15) + "Total".padStart(10) + "Average".padStart(10) + "Best".padStart(10) + "\n" + "".padEnd(45, "-") + "\n";
 
-    // average contest points
+        if (argumentType) {
+            SQL = `SELECT sum(points) AS sumContestPoints, avg(points) AS avgContestPoints, max(points) AS maxContestPoints
+                FROM contest_attendee_statistics AS a
+                INNER JOIN contests AS b
+                ON a.contestId = b.contestId
+                WHERE a.attendeeId = ? AND a.round = ? AND b.type = ?`;
+            DATABASE_DATA = [attendeeId, 0, argumentType];
+        } else {
+            SQL = `SELECT sum(points) AS sumContestPoints, avg(points) AS avgContestPoints, max(points) AS maxContestPoints
+                FROM contest_attendee_statistics
+                WHERE attendeeId = ? AND round = ?`;
+            DATABASE_DATA = [attendeeId, 0];
+        }
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var contestAttendeeStatisticsCP = RECORDS;
+
+        performanceString = performanceString + "Points".padEnd(15) 
+                          + contestAttendeeStatisticsCP[0].sumContestPoints.toString().padStart (10)
+                          + (Math.round(contestAttendeeStatisticsCP[0].avgContestPoints * 100) / 100).toString().padStart (10)
+                          + contestAttendeeStatisticsCP[0].maxContestPoints.toString().padStart (10) + "\n";
+
+        if (performanceString !== "") {
+            embed.addFields({
+                name: "Performance 🏹",
+                value: '```' + performanceString + '```',
+                inline: false
+            });
+        }
+    }
+
+    // display objectives
+    var objectivesString = "Objective".padEnd(15) + "Total".padStart(10) + "Average".padStart(10) + "Best".padStart(10) + "\n" + "".padEnd(45, "-") + "\n";
+
+    // query objectives
     if (argumentType) {
-        SQL = `SELECT avg(points) AS averageContestPoints
-            FROM contest_attendee_statistics AS a
+        SQL = `SELECT objectiveName, sum(objectiveValue) AS sumObjectiveValue, avg(objectiveValue) AS avgObjectiveValue, max(objectiveValue) AS maxObjectiveValue
+            FROM contest_attendee_objective_statistics AS a
             INNER JOIN contests AS b
             ON a.contestId = b.contestId
-            WHERE a.attendeeId = ? AND a.round = ? AND b.type = ?`;
+            WHERE a.attendeeId = ? AND a.round = ? AND b.type = ?
+            GROUP BY objectiveName`;
         DATABASE_DATA = [attendeeId, 0, argumentType];
+    } else if (argumentContestId) {
+        SQL = `SELECT objectiveName, sum(objectiveValue) AS sumObjectiveValue, avg(objectiveValue) AS avgObjectiveValue, max(objectiveValue) AS maxObjectiveValue
+            FROM contest_attendee_objective_statistics
+            WHERE attendeeId = ? AND round = ? AND contestId = ?
+            GROUP BY objectiveName`;
+        DATABASE_DATA = [attendeeId, 0, argumentContestId];
     } else {
-        SQL = `SELECT avg(points) AS averageContestPoints
-            FROM contest_attendee_statistics
-            WHERE attendeeId = ? AND round = ?`;
+        SQL = `SELECT objectiveName, sum(objectiveValue) AS sumObjectiveValue, avg(objectiveValue) AS avgObjectiveValue, max(objectiveValue) AS maxObjectiveValue
+            FROM contest_attendee_objective_statistics
+            WHERE attendeeId = ? AND round = ?
+            GROUP BY objectiveName`;
         DATABASE_DATA = [attendeeId, 0];
     }
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
-    var contestAttendeeStatisticsACP = RECORDS;
-
-    var averageContestPointsRounded = Math.round(contestAttendeeStatisticsACP[0].averageContestPoints * 100) / 100;
-
-    if (!argumentContestId) {
-        performanceString = performanceString + "Ø Points per Contest".padEnd(25) + averageContestPointsRounded + "\n";
+    var objectiveStatisticsDistinct = queryDatabase(SQL, DATABASE_DATA);
+    
+    for (var i = 0; i < objectiveStatisticsDistinct.length; i++) {
+        objectivesString = objectivesString + objectiveStatisticsDistinct[i].objectiveName.padEnd(15) 
+                         + objectiveStatisticsDistinct[i].sumObjectiveValue.toString().padStart (10)
+                         + (Math.round(objectiveStatisticsDistinct[i].avgObjectiveValue * 100) / 100).toString().padStart (10)
+                         + objectiveStatisticsDistinct[i].maxObjectiveValue.toString().padStart (10) + "\n";
     }
 
-    if (performanceString !== "") {
+    if (objectivesString !== "") {
         embed.addFields({
-            name: "Performance 🏹",
-            value: '```' + performanceString + '```',
+            name: "Objectives 🎗️",
+            value: '```' + objectivesString + '```',
             inline: false
         });
     }
