@@ -1137,26 +1137,37 @@ function boardContest() {
 
     // display objectives
     var objectivesString = "";
-    if (argumentType) {
-        SQL = `SELECT DISTINCT objectiveName
-            FROM contest_attendee_objective_statistics AS a
-            INNER JOIN contests AS b
-            ON a.contestId = b.contestId
-            WHERE b.type = ?
-            ORDER BY objectiveName`;
-        DATABASE_DATA = [argumentType];
+    var objectives = [];
+    if (config.boardObjectives) {
+        var objectiveData = "";
+        for (var i = 0; i < config.boardObjectives.length; i++) {
+            objectiveData = {
+                "objectiveName": config.boardObjectives[i]
+            }
+            objectives.push(objectiveData);
+        }
     } else {
-        SQL = `SELECT DISTINCT objectiveName
-            FROM contest_attendee_objective_statistics
-            ORDER BY objectiveName`;
-        DATABASE_DATA = [];
-    }
-    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+        if (argumentType) {
+            SQL = `SELECT DISTINCT objectiveName
+                FROM contest_attendee_objective_statistics AS a
+                INNER JOIN contests AS b
+                ON a.contestId = b.contestId
+                WHERE b.type = ?
+                ORDER BY objectiveName`;
+            DATABASE_DATA = [argumentType];
+        } else {
+            SQL = `SELECT DISTINCT objectiveName
+                FROM contest_attendee_objective_statistics
+                ORDER BY objectiveName`;
+            DATABASE_DATA = [];
+        }
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
-    var objectiveStatisticsDistinct = RECORDS;
+        objectives = RECORDS;
+    }
 
     // display statistics for every objective
-    for (var i = 0; i < objectiveStatisticsDistinct.length; i++) {
+    for (var i = 0; i < objectives.length; i++) {
         objectivesString = "Total".padEnd(20) + "Average".padEnd(20) + "Best".padEnd(20) + "\n" + "".padEnd(59, "-") + "\n";
         
         // total values
@@ -1168,14 +1179,14 @@ function boardContest() {
                 WHERE a.round = ? AND a.objectiveName = ? AND b.type = ?
                 GROUP BY a.attendeeId
                 ORDER BY sumObjectiveValue DESC`;
-            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName, argumentType];
+            DATABASE_DATA = [0, objectives[i].objectiveName, argumentType];
         } else {
             SQL = `SELECT attendeeId, sum(objectiveValue) AS sumObjectiveValue
                 FROM contest_attendee_objective_statistics
                 WHERE round = ? AND objectiveName = ?
                 GROUP BY attendeeId
                 ORDER BY sumObjectiveValue DESC`;
-            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName];
+            DATABASE_DATA = [0, objectives[i].objectiveName];
         }
         RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
@@ -1190,14 +1201,14 @@ function boardContest() {
                 WHERE a.round = ? AND a.objectiveName = ? AND b.type = ?
                 GROUP BY a.attendeeId
                 ORDER BY avgObjectiveValue DESC`;
-            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName, argumentType];
+            DATABASE_DATA = [0, objectives[i].objectiveName, argumentType];
         } else {
             SQL = `SELECT attendeeId, avg(objectiveValue) AS avgObjectiveValue
                 FROM contest_attendee_objective_statistics
                 WHERE round = ? AND objectiveName = ?
                 GROUP BY attendeeId
                 ORDER BY avgObjectiveValue DESC`;
-            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName];
+            DATABASE_DATA = [0, objectives[i].objectiveName];
         }
         RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
@@ -1212,14 +1223,14 @@ function boardContest() {
                 WHERE a.round = ? AND a.objectiveName = ? AND b.type = ?
                 GROUP BY a.attendeeId
                 ORDER BY maxObjectiveValue DESC`;
-            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName, argumentType];
+            DATABASE_DATA = [0, objectives[i].objectiveName, argumentType];
         } else {
             SQL = `SELECT attendeeId, max(objectiveValue) AS maxObjectiveValue
                 FROM contest_attendee_objective_statistics
                 WHERE round = ? AND objectiveName = ?
                 GROUP BY attendeeId
                 ORDER BY maxObjectiveValue DESC`;
-            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName];
+            DATABASE_DATA = [0, objectives[i].objectiveName];
         }
         RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
@@ -1273,7 +1284,7 @@ function boardContest() {
 
         if (objectivesString !== "") {
             embed.addFields({
-                name: objectiveStatisticsDistinct[i].objectiveName + " 🎗️",
+                name: objectives[i].objectiveName + " 🎗️",
                 value: '```' + objectivesString + '```',
                 inline: false
             });
