@@ -1129,10 +1129,155 @@ function boardContest() {
     
     if (pointsString !== "") {
         embed.addFields({
-            name: "Points 😎",
+            name: "Points 🎖️",
             value: '```' + pointsString + '```',
             inline: false
         });
+    }
+
+    // display objectives
+    var objectivesString = "";
+    if (argumentType) {
+        SQL = `SELECT DISTINCT objectiveName
+            FROM contest_attendee_objective_statistics AS a
+            INNER JOIN contests AS b
+            ON a.contestId = b.contestId
+            WHERE b.type = ?
+            ORDER BY objectiveName`;
+        DATABASE_DATA = [argumentType];
+    } else {
+        SQL = `SELECT DISTINCT objectiveName
+            FROM contest_attendee_objective_statistics
+            ORDER BY objectiveName`;
+        DATABASE_DATA = [];
+    }
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var objectiveStatisticsDistinct = RECORDS;
+
+    // display statistics for every objective
+    for (var i = 0; i < objectiveStatisticsDistinct.length; i++) {
+        objectivesString = "Total".padEnd(20) + "Average".padEnd(20) + "Best".padEnd(20) + "\n" + "".padEnd(59, "-") + "\n";
+        
+        // total values
+        if (argumentType) {
+            SQL = `SELECT a.attendeeId, sum(objectiveValue) AS sumObjectiveValue
+                FROM contest_attendee_objective_statistics AS a
+                INNER JOIN contests AS b
+                ON a.contestId = b.contestId
+                WHERE a.round = ? AND a.objectiveName = ? AND b.type = ?
+                GROUP BY a.attendeeId
+                ORDER BY sumObjectiveValue DESC`;
+            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName, argumentType];
+        } else {
+            SQL = `SELECT attendeeId, sum(objectiveValue) AS sumObjectiveValue
+                FROM contest_attendee_objective_statistics
+                WHERE round = ? AND objectiveName = ?
+                GROUP BY attendeeId
+                ORDER BY sumObjectiveValue DESC`;
+            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName];
+        }
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var objectiveStatisticsSum = RECORDS;
+
+        // average values
+        if (argumentType) {
+            SQL = `SELECT a.attendeeId, avg(objectiveValue) AS avgObjectiveValue
+                FROM contest_attendee_objective_statistics AS a
+                INNER JOIN contests AS b
+                ON a.contestId = b.contestId
+                WHERE a.round = ? AND a.objectiveName = ? AND b.type = ?
+                GROUP BY a.attendeeId
+                ORDER BY avgObjectiveValue DESC`;
+            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName, argumentType];
+        } else {
+            SQL = `SELECT attendeeId, avg(objectiveValue) AS avgObjectiveValue
+                FROM contest_attendee_objective_statistics
+                WHERE round = ? AND objectiveName = ?
+                GROUP BY attendeeId
+                ORDER BY avgObjectiveValue DESC`;
+            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName];
+        }
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var objectiveStatisticsAvg = RECORDS;
+
+        // best values
+        if (argumentType) {
+            SQL = `SELECT a.attendeeId, max(objectiveValue) AS maxObjectiveValue
+                FROM contest_attendee_objective_statistics AS a
+                INNER JOIN contests AS b
+                ON a.contestId = b.contestId
+                WHERE a.round = ? AND a.objectiveName = ? AND b.type = ?
+                GROUP BY a.attendeeId
+                ORDER BY maxObjectiveValue DESC`;
+            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName, argumentType];
+        } else {
+            SQL = `SELECT attendeeId, max(objectiveValue) AS maxObjectiveValue
+                FROM contest_attendee_objective_statistics
+                WHERE round = ? AND objectiveName = ?
+                GROUP BY attendeeId
+                ORDER BY maxObjectiveValue DESC`;
+            DATABASE_DATA = [0, objectiveStatisticsDistinct[i].objectiveName];
+        }
+        RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+        var objectiveStatisticsMax = RECORDS;
+
+        // display leading attendees
+        var displayName, contestAttendees, sumObjectiveValueRounded, avgObjectiveValueRounded, maxObjectiveValueRounded;
+        for (var j = 0; j < 3; j++) {
+
+            // total values
+            SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
+            DATABASE_DATA = [objectiveStatisticsSum[j].attendeeId];
+            RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+            contestAttendees = RECORDS;
+
+            displayName = shortenName(contestAttendees[i].name);
+
+            sumObjectiveValueRounded = Math.round(objectiveStatisticsSum[j].sumObjectiveValue * 100) / 100;
+
+            objectivesString = objectivesString + displayName.padEnd(MAXIMUM_NAME_LENGTH + 1) + sumObjectiveValueRounded.toString().padStart(MAXIMUM_NUMBER_LENGTH) + " ";
+
+            // average values
+            SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
+            DATABASE_DATA = [objectiveStatisticsAvg[j].attendeeId];
+            RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+            contestAttendees = RECORDS;
+
+            displayName = shortenName(contestAttendees[i].name);
+
+            avgObjectiveValueRounded = Math.round(objectiveStatisticsAvg[j].avgObjectiveValue * 100) / 100;
+
+            objectivesString = objectivesString + displayName.padEnd(MAXIMUM_NAME_LENGTH + 1) + avgObjectiveValueRounded.toString().padStart(MAXIMUM_NUMBER_LENGTH) + " ";
+
+            // best values
+            SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
+            DATABASE_DATA = [objectiveStatisticsMax[j].attendeeId];
+            RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+            contestAttendees = RECORDS;
+
+            displayName = shortenName(contestAttendees[i].name);
+
+            maxObjectiveValueRounded = Math.round(objectiveStatisticsMax[j].maxObjectiveValue * 100) / 100;
+
+            objectivesString = objectivesString + displayName.padEnd(MAXIMUM_NAME_LENGTH + 1) + maxObjectiveValueRounded.toString().padStart(MAXIMUM_NUMBER_LENGTH) + " ";
+
+            objectivesString = objectivesString + "\n";
+        }
+
+        if (objectivesString !== "") {
+            embed.addFields({
+                name: objectiveStatisticsDistinct[i].objectiveName + " 🎗️",
+                value: '```' + objectivesString + '```',
+                inline: false
+            });
+        }
     }
     
     MESSAGE.channel.send({ embeds: [embed] });
