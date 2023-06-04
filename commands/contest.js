@@ -2650,7 +2650,7 @@ function getTeam(contestId, attendees, teamSize) {
     var teamIndex = Math.floor(Math.random() * pairingPool.length);
     var pickedTeam = possibleTeams[pairingPool[teamIndex].index];
 
-    console.info("Picked a team of size '" + teamSize + "' for contest '" + contestId + "' with a pairing score of '" + pairingPool[teamIndex].score + "'!");
+    console.info("Picked a team of size '" + teamSize + "' for contest '" + contestId + "' with a pairing score of '" + pairingPool[teamIndex].score + "' (" + pairingPool.length + " in pool)!");
 
     return pickedTeam;
 }
