@@ -2428,7 +2428,7 @@ function initializeDatabase() {
     const db = new sqlite3(DB_PATH);
 
     // create table "contests"
-    SQL = `CREATE TABLE IF NOT EXISTS contests_bak (
+    SQL = `CREATE TABLE IF NOT EXISTS contests (
         id INTEGER PRIMARY KEY,
         contestId TEXT NOT NULL UNIQUE,
         creationDate TEXT NOT NULL,
