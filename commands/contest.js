@@ -80,6 +80,10 @@ module.exports = {
             case "team":
                 teamContest();
                 break;
+            case "n":
+            case "nickname":
+                setNickname();
+                break;
 
             // information
             case "i":
@@ -153,7 +157,6 @@ function createContest() {
 
     var contestState = STAT_OPEN;
     var contestAuthorId = MESSAGE.author.id;
-    var contestAuthorName = MESSAGE.author.username;
     var contestCurrentRound = 1;
     var contestEntryCount = 0;
     var contestMaxRoundCount = 0;
@@ -216,21 +219,19 @@ function createContest() {
         creationDate,
         state,
         authorId,
-        authorName,
         entryCount,
         currentRound,
         maxRoundCount,
         rated,
         type,
         modtime
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     DATABASE_DATA = [
         contestId,
         contestCreationDate,
         contestState,
         contestAuthorId,
-        contestAuthorName,
         contestEntryCount,
         contestCurrentRound,
         contestMaxRoundCount,
@@ -241,7 +242,7 @@ function createContest() {
     writeDatabase(SQL, DATABASE_DATA);
 
     MESSAGE.channel.send("Contest `" + contestId + "` created!");
-    console.info(contestAuthorName + ' (' + contestAuthorId + ') ' + "has created contest '" + contestId + "'!");
+    console.info("Contest '" + contestId + "' created by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')!');
 
     printContestSheet(contestId);
 }
@@ -308,7 +309,7 @@ function deleteContest() {
     writeDatabase(SQL, DATABASE_DATA);
 
     MESSAGE.channel.send("Contest `" + contestId + "` has been deleted!");
-    console.info(MESSAGE.author.username + ' (' + MESSAGE.author.id + ') ' + "has deleted contest '" + contestId + "'!");
+    console.info("Contest '" + contestId + "' deleted by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')!');
 }
 
 function optionsContest() {
@@ -466,7 +467,7 @@ function optionsContest() {
     }
     
     MESSAGE.channel.send("Options for contest `" + contestId + "` changed!");
-    console.info(MESSAGE.author.username + ' (' + MESSAGE.author.id + ') ' + "has changed options for contest '" + contestId + "'!");
+    console.info("Options for '" + contestId + "' changed by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')!');
 
     printContestSheet(contestId);
 }
@@ -528,7 +529,7 @@ function joinContest() {
     writeDatabase(SQL, DATABASE_DATA);
 
     MESSAGE.channel.send("You're now competing in contest `" + contestId + "`!");
-    console.info(attendeeName + ' (' + attendeeId + ') ' + "has joined contest '" + contestId + "'!");
+    console.info("Contest '" + contestId + "' joined by " + attendeeName + ' (' + attendeeId + ')!');
 }
 
 function leaveContest() {
@@ -579,7 +580,7 @@ function leaveContest() {
     writeDatabase(SQL, DATABASE_DATA);
 
     MESSAGE.channel.send("You've left contest `" + contestId + "`!");
-    console.info(attendeeName + ' (' + attendeeId + ') ' + "has left contest '" + contestId + "'!");
+    console.info("Contest '" + contestId + "' left by " + attendeeName + ' (' + attendeeId + ')!');
 }
 
 function infoContest() {
@@ -608,7 +609,7 @@ function infoContest() {
 
 function listContests() {
     // query contests
-    SQL = "SELECT contestId, entryCount, state, authorName, creationDate, type FROM contests";
+    SQL = "SELECT contestId, entryCount, state, authorId, creationDate, type FROM contests";
     DATABASE_DATA = [];
     RECORDS = queryDatabase(SQL, DATABASE_DATA);
 
@@ -643,7 +644,7 @@ function listContests() {
                 break;
         }
 
-        contestsString = contestsString + contests[i].contestId + " (" + contests[i].creationDate.substr(0, 10) + ") - (" + contests[i].authorName + ")";
+        contestsString = contestsString + contests[i].contestId + " (" + contests[i].creationDate.substr(0, 10) + ") - (" + getAttendeeName(contests[i].authorId) + ")";
         
         if (contests[i].type) {
             contestsString = contestsString + " - (" + contests[i].type + ")`\n";
@@ -953,14 +954,7 @@ function boardContest() {
     var medalsString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
 
-        // query attendees
-        SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-        DATABASE_DATA = [sortedAttendees[i].id];
-        RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-        var contestAttendees = RECORDS;
-
-        medalsString = medalsString + contestAttendees[0].name.padEnd(20);
+        medalsString = medalsString + getAttendeeName(sortedAttendees[i].id).padEnd(20);
 
         // query general statistics
         if (argumentType) {
@@ -1080,43 +1074,25 @@ function boardContest() {
 
     var contestAttendeeStatisticsMCP = RECORDS;
 
-    var displayName, contestAttendees, sumContestPointsRounded, avgContestPointsRounded, maxContestPointsRounded;
+    var displayName, sumContestPointsRounded, avgContestPointsRounded, maxContestPointsRounded;
     for (var i = 0; i < 3; i++) {
 
         // total points
-        SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-        DATABASE_DATA = [contestAttendeeStatisticsSCP[i].attendeeId];
-        RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-        contestAttendees = RECORDS;
-
-        displayName = shortenName(contestAttendees[i].name);
+        displayName = shortenName(getAttendeeName(contestAttendeeStatisticsSCP[i].attendeeId));
 
         sumContestPointsRounded = Math.round(contestAttendeeStatisticsSCP[i].sumContestPoints * 100) / 100;
 
         pointsString = pointsString + displayName.padEnd(MAXIMUM_NAME_LENGTH + 1) + sumContestPointsRounded.toString().padStart(MAXIMUM_NUMBER_LENGTH) + " ";
 
         // average points
-        SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-        DATABASE_DATA = [contestAttendeeStatisticsACP[i].attendeeId];
-        RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-        contestAttendees = RECORDS;
-
-        displayName = shortenName(contestAttendees[i].name);
+        displayName = shortenName(getAttendeeName(contestAttendeeStatisticsACP[i].attendeeId));
 
         avgContestPointsRounded = Math.round(contestAttendeeStatisticsACP[i].avgContestPoints * 100) / 100;
 
         pointsString = pointsString + displayName.padEnd(MAXIMUM_NAME_LENGTH + 1) + avgContestPointsRounded.toString().padStart(MAXIMUM_NUMBER_LENGTH) + " ";
 
         // best points
-        SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-        DATABASE_DATA = [contestAttendeeStatisticsMCP[i].attendeeId];
-        RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-        contestAttendees = RECORDS;
-
-        displayName = shortenName(contestAttendees[i].name);
+        displayName = shortenName(getAttendeeName(contestAttendeeStatisticsMCP[i].attendeeId));
 
         maxContestPointsRounded = Math.round(contestAttendeeStatisticsMCP[i].maxContestPoints * 100) / 100;
 
@@ -1237,43 +1213,25 @@ function boardContest() {
         var objectiveStatisticsMax = RECORDS;
 
         // display leading attendees
-        var displayName, contestAttendees, sumObjectiveValueRounded, avgObjectiveValueRounded, maxObjectiveValueRounded;
+        var displayName, sumObjectiveValueRounded, avgObjectiveValueRounded, maxObjectiveValueRounded;
         for (var j = 0; j < 3; j++) {
 
             // total values
-            SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-            DATABASE_DATA = [objectiveStatisticsSum[j].attendeeId];
-            RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-            contestAttendees = RECORDS;
-
-            displayName = shortenName(contestAttendees[i].name);
+            displayName = shortenName(getAttendeeName(objectiveStatisticsSum[j].attendeeId));
 
             sumObjectiveValueRounded = Math.round(objectiveStatisticsSum[j].sumObjectiveValue * 100) / 100;
 
             objectivesString = objectivesString + displayName.padEnd(MAXIMUM_NAME_LENGTH + 1) + sumObjectiveValueRounded.toString().padStart(MAXIMUM_NUMBER_LENGTH) + " ";
 
             // average values
-            SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-            DATABASE_DATA = [objectiveStatisticsAvg[j].attendeeId];
-            RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-            contestAttendees = RECORDS;
-
-            displayName = shortenName(contestAttendees[i].name);
+            displayName = shortenName(getAttendeeName(objectiveStatisticsAvg[j].attendeeId));
 
             avgObjectiveValueRounded = Math.round(objectiveStatisticsAvg[j].avgObjectiveValue * 100) / 100;
 
             objectivesString = objectivesString + displayName.padEnd(MAXIMUM_NAME_LENGTH + 1) + avgObjectiveValueRounded.toString().padStart(MAXIMUM_NUMBER_LENGTH) + " ";
 
             // best values
-            SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
-            DATABASE_DATA = [objectiveStatisticsMax[j].attendeeId];
-            RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-            contestAttendees = RECORDS;
-
-            displayName = shortenName(contestAttendees[i].name);
+            displayName = shortenName(getAttendeeName(objectiveStatisticsMax[j].attendeeId));
 
             maxObjectiveValueRounded = Math.round(objectiveStatisticsMax[j].maxObjectiveValue * 100) / 100;
 
@@ -1552,7 +1510,7 @@ function entryContest() {
     }
     
     MESSAGE.channel.send("Your entry `" + entryId + "` has been logged!");
-    console.info(MESSAGE.author.username + ' (' + MESSAGE.author.id + ') ' + "has logged an entry '" + entryId + "' in contest '" + contestId + "'!");
+    console.info("Entry for '" + contestId + "' logged by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')!');
 
     isFinished = checkFinished(contestId);
     if (isFinished) {
@@ -1669,7 +1627,7 @@ function updateEntry() {
     }
     
     MESSAGE.channel.send("Your entry `" + entryId + "` has been updated!");
-    console.info(MESSAGE.author.username + ' (' + MESSAGE.author.id + ') ' + "has updated an entry '" + entryId + "' in contest '" + contests[0].contestId + "'!");
+    console.info("Entry for '" + contests[0].contestId + "' updated by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')!');
 }
 
 function teamContest() {
@@ -1785,9 +1743,55 @@ function teamContest() {
 
 
     MESSAGE.channel.send("Teams have been generated for round " + contests[0].currentRound + "!");
-    console.info("Teams for contest '" + contestId + "' have been generated by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')!');
+    console.info("Teams for '" + contestId + "' generated by " + MESSAGE.author.username + ' (' + MESSAGE.author.id + ')!');
 
     printRoundSheet(contestId, contests[0].currentRound);
+}
+
+function setNickname() {
+    var nickname = ARGS[1];
+
+    var attendeeId = MESSAGE.author.id;
+
+    // query nicknames
+    SQL = "SELECT attendeeId, nickname FROM contest_attendee_nicknames WHERE attendeeId = ?";
+    DATABASE_DATA = [attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var nicknames = RECORDS;
+
+    // prepare contest data for table "contest_attendee_nicknames"
+    MODTIME = getModtime();
+
+    if (!nicknames.length) {
+        SQL = `INSERT INTO contest_attendee_nicknames(
+            attendeeId,
+            nickname,
+            modtime
+            ) VALUES (?, ?, ?)`;
+        DATABASE_DATA = [
+            attendeeId,
+            nickname,
+            MODTIME];
+    } else {
+        SQL = `UPDATE contest_attendee_nicknames
+            SET nickname = ?, modtime = ?
+            WHERE attendeeId = ?`;
+        DATABASE_DATA = [
+            nickname,
+            MODTIME,
+            attendeeId];
+    }
+
+    writeDatabase(SQL, DATABASE_DATA);
+
+    if (!nicknames.length) {
+        MESSAGE.channel.send("You are now known as `" + nickname + "`!");
+        console.info("Nickname '" + nickname + "' created by " + attendeeId + "!");
+    } else {
+        MESSAGE.channel.send("You've changed your nickname from `" + nicknames[0].nickname + "` to `" + nickname + "`!");
+        console.info("Nickname changed from '" + nicknames[0].nickname + "' to '" + nickname + "' by " + attendeeId + "!");
+    }
 }
 
 function init() {
@@ -1901,7 +1905,7 @@ function printContestSheet(contestId) {
         attendeePointsRounded = Math.round(attendeePoints * 100) / 100;
 
         var attendeeData = {
-            "name": contestAttendees[i].name,
+            "name": getAttendeeName(contestAttendees[i].attendeeId),
             "points": attendeePointsRounded
         }
 
@@ -2018,7 +2022,7 @@ function printRoundSheet(contestId, contestRound) {
         attendeePointsRounded = Math.round(attendeePoints * 100) / 100;
 
         var attendeeData = {
-            "name": contestAttendees[i].name,
+            "name": getAttendeeName(contestAttendees[i].attendeeId),
             "points": attendeePointsRounded
         }
 
@@ -2066,7 +2070,7 @@ function printRoundSheet(contestId, contestRound) {
 
             playerStatisticsString = playerStatisticsString + " ";
         }
-        playerStatisticsString = playerStatisticsString + "- " + contestAttendees[i].name + '\n';
+        playerStatisticsString = playerStatisticsString + "- " + getAttendeeName(contestAttendees[i].attendeeId) + '\n';
     }
 
     if (playerStatisticsString !== "") {
@@ -2094,13 +2098,7 @@ function printRoundSheet(contestId, contestRound) {
                 lastTeamId = contestAttendeeTeams[i].teamId;
             }
 
-            SQL = "SELECT name FROM contest_attendees WHERE contestId = ? AND attendeeId = ?";
-            DATABASE_DATA = [contestId, contestAttendeeTeams[i].attendeeId];
-            RECORDS = queryDatabase(SQL, DATABASE_DATA);
-
-            var contestAttendees = RECORDS;
-
-            teamsString = teamsString + "- " + contestAttendees[0].name + "\n";
+            teamsString = teamsString + "- " + getAttendeeName(contestAttendeeTeams[i].attendeeId) + "\n";
         }
 
         embed.addFields({
@@ -2413,11 +2411,11 @@ function refreshStatistics(contestId) {
                 }
             }
         }
-        console.info("Statistics of contest '" + contests[i].contestId + "' have been refreshed!");
+        console.info("Statistics for contest '" + contests[i].contestId + "' have been refreshed!");
     }
 
     if (contestId) {
-        MESSAGE.channel.send("Statistics of contest `" + contestId + "` have been refreshed!");
+        MESSAGE.channel.send("Statistics for contest `" + contestId + "` have been refreshed!");
     } else {
         MESSAGE.channel.send("All statistics have been refreshed!");
     }
@@ -2436,7 +2434,6 @@ function initializeDatabase() {
         creationDate TEXT NOT NULL,
         state TEXT NOT NULL,
         authorId TEXT NOT NULL,
-        authorName TEXT NOT NULL,
         entryCount INTEGER NOT NULL,
         currentRound INTEGER NOT NULL,
         maxRoundCount INTEGER NOT NULL,
@@ -2514,6 +2511,15 @@ function initializeDatabase() {
         
     db.prepare(SQL).run();
 
+    // create table "contest_attendee_nickname"
+    SQL = `CREATE TABLE IF NOT EXISTS contest_attendee_nicknames (
+        id INTEGER PRIMARY KEY,
+        attendeeId TEXT NOT NULL,
+        nickname TEXT NOT NULL,
+        modtime TEXT NOT NULL)`;
+        
+    db.prepare(SQL).run();
+
     db.close();
 }
 
@@ -2553,6 +2559,31 @@ function shortenName(name) {
         return name.substr(0, MAXIMUM_NAME_LENGTH - 3).concat("...");
     } else {
         return name;
+    }
+}
+
+function getAttendeeName(attendeeId) {
+    
+    // query nicknames
+    SQL = "SELECT nickname FROM contest_attendee_nicknames WHERE attendeeId = ?";
+    DATABASE_DATA = [attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var nicknames = RECORDS;
+
+    if (nicknames.length) {
+        return nicknames[0].nickname;
+    }
+
+    // query attendees
+    SQL = "SELECT name FROM contest_attendees WHERE attendeeId = ? ORDER BY modtime DESC";
+    DATABASE_DATA = [attendeeId];
+    RECORDS = queryDatabase(SQL, DATABASE_DATA);
+
+    var contestAttendees = RECORDS;
+
+    if (contestAttendees.length) {
+        return contestAttendees[0].name;
     }
 }
 

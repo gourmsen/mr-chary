@@ -34,7 +34,7 @@ function defaultHelp() {
         {name: "`!cry help`", value: "Prints this help.", inline: false},
         {name: "`!cry list (-g|--group=<name>)`", value: "Lists all available items.", inline: false},
         {name: "`!cry random (-fs|--fill-slots) (-fm|--force-melee) (-fk|--force-kit) (-bl|--bloodline-level=<value>)`", value: "Generates a random loadout.", inline: false},
-        {name: "`!cry contest (create|delete|options|info|personal|board|join|leave|start|round|end|add|list|update|team)`", value: "Manages the contest.", inline: false}
+        {name: "`!cry contest (create|delete|options|info|personal|board|join|leave|start|round|end|add|list|update|team|nickname)`", value: "Manages the contest.", inline: false}
     );
 
     MESSAGE.channel.send({ embeds: [embed] });
@@ -61,6 +61,7 @@ function contestHelp() {
         {name: "`!cry contest add [contest_id] <objective=value>:n`",               value: "Log an entry for the contest.", inline: false},
         {name: "`!cry contest update [entry_id] <objective=value>:n`",              value: "Update an entry of the contest.", inline: false},
         {name: "`!cry contest team [contest_id] [team_size]:n`",                    value: "Generate teams for the current round.", inline: false},
+        {name: "`!cry contest nickname [nickname]`",                                value: "Change your nickname.", inline: false},
         {name: "`!cry contest list`",                                               value: "List all contests.", inline: false}
     );
 

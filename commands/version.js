@@ -8,11 +8,12 @@ module.exports = {
 
         const embed = new MessageEmbed()
         .setTitle("📕 Version History")
-        .setDescription("Version `0.4.6`")
+        .setDescription("Version `0.4.7`")
         .setColor("#a844ff")
         .setTimestamp()
         .addFields(
             {name: "> 0.4", value: "" +
+                                   "Added nicknames `(0.4.7)`. \n" +
                                    "Added type `(0.4.6)`. \n" +
                                    "Added contest options `(0.4.5)`. \n" +
                                    "Added delete/leave `(0.4.4)`. \n" +
