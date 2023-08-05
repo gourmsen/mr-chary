@@ -954,7 +954,9 @@ function boardContest() {
     var medalsString = "";
     for (var i = 0; i < sortedAttendees.length; i++) {
 
-        medalsString = medalsString + getAttendeeName(sortedAttendees[i].id).padEnd(20);
+        nameString = getAttendeeName(sortedAttendees[i].id) + " (" + sortedAttendees[i].points + ")";
+
+        medalsString = medalsString + nameString.padEnd(20);
 
         // query general statistics
         if (argumentType) {
@@ -977,21 +979,33 @@ function boardContest() {
         var contestAttendeeStatistics = RECORDS;
 
         // display medals
+        var lastPlace = contestAttendeeStatistics[0].place;
+        var medalCount = 0;
         for (var j = 0; j < contestAttendeeStatistics.length; j++) {
 
-            switch (contestAttendeeStatistics[j].place) {
+            if (contestAttendeeStatistics[j].place === lastPlace) {
+                medalCount++;
+                continue;
+            }
+            
+            switch (lastPlace) {
                 case 1:
-                    medalsString = medalsString + '🥇';
+                    medalsString = medalsString + medalCount + 'x🥇'.padEnd(5);
                     break;
                 case 2:
-                    medalsString = medalsString + '🥈';
+                    medalsString = medalsString + medalCount + 'x🥈'.padEnd(5);
                     break;
                 case 3:
-                    medalsString = medalsString + '🥉';
+                    medalsString = medalsString + medalCount + 'x🥉'.padEnd(5);
                     break;
                 default:
                     break;
             }
+
+            lastPlace = contestAttendeeStatistics[j].place;
+            medalCount = 0;
+
+            j--;
         }
 
         medalsString = medalsString + "\n";
